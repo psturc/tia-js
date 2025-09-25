@@ -90,30 +90,29 @@ yarn tia run --use-coverage
 - 🔄 **Asset changes** → Intelligent fallback (dependency analysis, heuristics)
 - 🎯 **Hybrid strategy** → NYC for JS, fallback for assets
 
-### **How to Test Coverage-Based TIA**:
+### **How to Experience Coverage-Based TIA Progression**:
 
-1. **Run Cypress tests with coverage**:
-   ```bash
-   npm run test:coverage
-   ```
+**Initial State** (Clean - No Coverage Data):
+```bash
+yarn tia coverage stats          # Shows: No coverage data found
+yarn tia analyze --use-coverage  # Falls back to traditional analysis
+```
 
-2. **Check what files were covered**:
-   ```bash
-   yarn tia coverage stats
-   ```
+**After Running Tests** (Coverage Data Collected):
+```bash
+npm run test:coverage            # Collect per-test coverage data
+yarn tia coverage stats          # Shows: X tests with coverage data
+yarn tia analyze --use-coverage  # Uses precise coverage-based analysis
+```
 
-3. **Make a JavaScript change and analyze**:
-   ```bash
-   # Edit src/calculator.js
-   yarn tia analyze --use-coverage
-   ```
+**Compare Precision**:
+```bash
+# Edit src/calculator.js
+yarn tia analyze                 # Traditional: Both tests affected
+yarn tia analyze --use-coverage  # Coverage-based: Only calculator test
+```
 
-4. **Compare with traditional analysis**:
-   ```bash
-   yarn tia analyze  # Traditional approach
-   ```
-
-The coverage-based approach will show **precise test selection** for JavaScript changes based on actual code execution tracked by Istanbul instrumentation.
+This demonstrates the **authentic progression** from traditional analysis to precision coverage-based selection.
 
 ### **Real-World Workflow**:
 
