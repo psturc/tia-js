@@ -8,10 +8,13 @@ const __dirname = path.dirname(__filename);
 
 export default {
   mode: 'production',
-  entry: './src/calculator.js',
+  entry: {
+    app: './src/app.js',
+    calculator: './src/calculator.js'
+  },
   output: {
     path: path.resolve(__dirname, 'dist'),
-    filename: 'calculator.js',
+    filename: '[name].js',
     clean: true,
   },
   module: {

@@ -1,4 +1,5 @@
 // Calculator functionality
+import { formatNumber, isValidNumber, sanitizeInput } from './utils.js';
 class Calculator {
     constructor() {
         this.history = [];
@@ -30,7 +31,7 @@ class Calculator {
         const resultElement = document.getElementById('result');
 
         // Validation
-        if (isNaN(num1) || isNaN(num2)) {
+        if (!isValidNumber(num1) || !isValidNumber(num2)) {
             resultElement.textContent = 'Please enter valid numbers';
             resultElement.style.color = 'red';
             return;
