@@ -1,22 +1,30 @@
-const { defineConfig } = require('cypress');
+import { defineConfig } from 'cypress';
+import { createRequire } from 'module';
 
-module.exports = defineConfig({
+// Create require function for CommonJS modules
+const require = createRequire(import.meta.url);
+
+export default defineConfig({
   e2e: {
     baseUrl: 'http://localhost:3000',
     specPattern: 'cypress/e2e/**/*.cy.{js,jsx,ts,tsx}',
     supportFile: 'cypress/support/e2e.js',
     setupNodeEvents(on, config) {
       // Code coverage setup
-      require('@cypress/code-coverage/task')(on, config)
+      try {
+        require('@cypress/code-coverage/task')(on, config);
+      } catch (error) {
+        console.warn('[Coverage] Code coverage plugin failed to load:', error.message);
+      }
       
       // TIA coverage data collection
       on('task', {
         'tia:storeCoverage': async ({ testFile, executedFiles, metadata }) => {
-          const { TIAEngine } = require('@tia-js/core');
-          
           try {
+            const { TIAEngine } = require('@tia-js/core');
+            
             // Load TIA config
-            const tiaConfig = require('../../tia.config.js');
+            const tiaConfig = require('../../tia.config.cjs');
             const engine = new TIAEngine(tiaConfig);
             
             // Store coverage data
@@ -31,7 +39,7 @@ module.exports = defineConfig({
         }
       });
 
-      return config
+      return config;
     },
   },
 });
