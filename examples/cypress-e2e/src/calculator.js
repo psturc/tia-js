@@ -44,7 +44,7 @@ class Calculator {
             result = num1 + num2;
             operationSymbol = '+';
             console.log('Addition performed:', result);
-            console.log('Testing precision with webpack instrumentation');
+            console.log('NYC coverage-based TIA precision test');
                 break;
             case 'subtract':
                 result = num1 - num2;

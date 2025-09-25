@@ -64,12 +64,27 @@ export class TIAEngine {
       const changedFiles = await this.changeDetector.detectChanges(options);
       this.logger.info(`Found ${changedFiles.length} changed files`);
 
-      // Step 2: Analyze using coverage data
+      // Step 2: Analyze using coverage data (try NYC first, then TIA storage)
       this.logger.info('Analyzing coverage data...');
-      const coverageAnalysis = await this.coverageAnalyzer.analyzeAffectedTests(
-        changedFiles.map(f => f.path),
-        'heuristic' // fallback to heuristic if no coverage
-      );
+      
+      // Check if we have NYC coverage and any JS files changed
+      const jsChanges = changedFiles.filter(f => f.path.endsWith('.js'));
+      const hasNYCCoverage = this.coverageAnalyzer['nycReader'].hasNYCCoverage();
+      
+      let coverageAnalysis;
+      if (hasNYCCoverage && jsChanges.length > 0) {
+        this.logger.info('Using NYC coverage for JavaScript changes');
+        coverageAnalysis = await this.coverageAnalyzer.analyzeAffectedTestsWithNYC(
+          changedFiles.map(f => f.path),
+          'current-test' // This should be determined differently in real implementation
+        );
+      } else {
+        this.logger.info('Using TIA coverage storage');
+        coverageAnalysis = await this.coverageAnalyzer.analyzeAffectedTests(
+          changedFiles.map(f => f.path),
+          'heuristic' // fallback to heuristic if no coverage
+        );
+      }
 
       let affectedTests = coverageAnalysis.affectedTests;
 

@@ -184,12 +184,12 @@ export class NYCCoverageReader {
    */
   private isSourceFile(filePath: string): boolean {
     return !filePath.includes('node_modules') &&
-           !filePath.includes('cypress') &&
-           !filePath.includes('test') &&
-           !filePath.includes('spec') &&
+           !filePath.includes('/cypress/') &&
+           !filePath.includes('/test/') &&
+           !filePath.includes('/spec/') &&
            !filePath.endsWith('.test.js') &&
            !filePath.endsWith('.spec.js') &&
            !filePath.endsWith('.cy.js') &&
-           filePath.includes('src/');
+           (filePath.includes('/src/') || filePath.startsWith('src/'));
   }
 }
