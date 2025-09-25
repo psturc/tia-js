@@ -1,0 +1,29 @@
+{
+  "name": "tia-jest-example",
+  "version": "1.0.0",
+  "description": "Example project using TIA with Jest",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "tia:analyze": "tia analyze",
+    "tia:run": "tia run",
+    "tia:watch": "tia watch"
+  },
+  "devDependencies": {
+    "@tia-js/cli": "^1.0.0",
+    "jest": "^29.0.0",
+    "@types/jest": "^29.0.0",
+    "typescript": "^5.0.0",
+    "ts-jest": "^29.0.0"
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "node",
+    "testMatch": ["**/*.test.ts"],
+    "collectCoverageFrom": [
+      "src/**/*.ts",
+      "!src/**/*.test.ts"
+    ]
+  }
+}

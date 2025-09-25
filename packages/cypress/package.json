@@ -1,0 +1,41 @@
+{
+  "name": "@tia-js/cypress",
+  "version": "1.0.0",
+  "description": "Cypress adapter for Test Impact Analysis",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist",
+    "lint": "eslint src/**/*.ts",
+    "test": "jest"
+  },
+  "keywords": [
+    "test",
+    "impact",
+    "analysis",
+    "cypress",
+    "e2e",
+    "testing"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "dependencies": {
+    "@tia-js/common": "^1.0.0",
+    "@tia-js/core": "^1.0.0"
+  },
+  "peerDependencies": {
+    "cypress": ">=10.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

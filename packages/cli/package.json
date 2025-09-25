@@ -1,0 +1,51 @@
+{
+  "name": "@tia-js/cli",
+  "version": "1.0.0",
+  "description": "Universal CLI for Test Impact Analysis",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "tia": "dist/bin/tia.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist",
+    "lint": "eslint src/**/*.ts",
+    "test": "jest"
+  },
+  "keywords": [
+    "test",
+    "impact",
+    "analysis",
+    "cli",
+    "testing",
+    "cypress",
+    "playwright",
+    "jest"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "dependencies": {
+    "@tia-js/common": "^1.0.0",
+    "@tia-js/core": "^1.0.0",
+    "@tia-js/cypress": "^1.0.0",
+    "@tia-js/playwright": "^1.0.0",
+    "@tia-js/jest": "^1.0.0",
+    "commander": "^11.0.0",
+    "chalk": "^4.1.2",
+    "ora": "^5.4.1",
+    "inquirer": "^8.2.6"
+  },
+  "devDependencies": {
+    "@types/inquirer": "^9.0.0",
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

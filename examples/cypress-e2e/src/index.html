@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TIA Cypress Example</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Calculator App</h1>
+        
+        <div class="calculator">
+            <input type="number" id="num1" placeholder="First number" data-cy="num1">
+            <select id="operation" data-cy="operation">
+                <option value="add">+</option>
+                <option value="subtract">-</option>
+                <option value="multiply">×</option>
+                <option value="divide">÷</option>
+            </select>
+            <input type="number" id="num2" placeholder="Second number" data-cy="num2">
+            <button id="calculate" data-cy="calculate">Calculate</button>
+            <div id="result" data-cy="result"></div>
+        </div>
+
+        <div class="history">
+            <h2>History</h2>
+            <button id="clear-history" data-cy="clear-history">Clear History</button>
+            <ul id="history-list" data-cy="history-list"></ul>
+        </div>
+    </div>
+
+    <script src="calculator.js"></script>
+</body>
+</html>
