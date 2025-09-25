@@ -134,7 +134,7 @@ function displayAnalysisResults(result: TIAResult, verbose: boolean): void {
         
         if (test.metadata?.dependencies) {
           const deps = test.metadata.dependencies.slice(0, 3); // Show first 3 dependencies
-          console.log(`   Dependencies: ${deps.map(d => d.replace(process.cwd() + '/', '')).join(', ')}`);
+          console.log(`   Dependencies: ${deps.map((d: string) => d.replace(process.cwd() + '/', '')).join(', ')}`);
           if (test.metadata.dependencies.length > 3) {
             console.log(`   ... and ${test.metadata.dependencies.length - 3} more`);
           }

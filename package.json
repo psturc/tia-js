@@ -1,5 +1,5 @@
 {
-  "name": "@tia-js",
+  "name": "tia-js",
   "version": "1.0.0",
   "description": "Test Impact Analysis ecosystem for multiple testing frameworks",
   "private": true,
@@ -11,9 +11,9 @@
     "test": "lerna run test",
     "lint": "lerna run lint",
     "clean": "lerna run clean",
-    "bootstrap": "lerna bootstrap",
     "publish": "lerna publish",
-    "dev": "lerna run dev --parallel"
+    "dev": "lerna run dev --parallel",
+    "tia": "./packages/cli/dist/bin/tia.js"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",

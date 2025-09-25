@@ -116,26 +116,16 @@ async function loadConfigFile(configPath: string): Promise<Partial<TIAConfig>> {
     return parsed;
   } else {
     // JavaScript/TypeScript configuration
-    // In a real implementation, you'd want to use dynamic imports
-    // For now, we'll try to parse as JSON-like object
-    const content = await fs.readFile(configPath, 'utf-8');
-    
     try {
-      // Simple regex-based extraction for module.exports
-      const moduleExportsMatch = content.match(/module\.exports\s*=\s*({[\s\S]*?});?\s*$/m);
-      if (moduleExportsMatch) {
-        // This is a very simplified approach - in production you'd want proper AST parsing
-        const configStr = moduleExportsMatch[1];
-        const jsonStr = configStr
-          .replace(/([{,]\s*)(\w+):/g, '$1"$2":') // Quote keys
-          .replace(/'/g, '"') // Convert single quotes to double quotes
-          .replace(/,\s*}/g, '}') // Remove trailing commas
-          .replace(/,\s*]/g, ']'); // Remove trailing commas in arrays
-        
-        return JSON.parse(jsonStr);
-      }
+      // Clear the require cache to ensure fresh load
+      delete require.cache[require.resolve(configPath)];
+      
+      // Use require to load the JavaScript config
+      const config = require(configPath);
+      return config;
     } catch (parseError) {
       console.warn(`Warning: Could not parse config file ${configPath}, using defaults`);
+      console.warn(`Error details: ${parseError instanceof Error ? parseError.message : parseError}`);
     }
     
     return {};

@@ -249,7 +249,7 @@ export class PlaywrightAdapter implements TIAAdapter {
           const result = this.parsePlaywrightResults(stdout, stderr, code === 0);
           resolve(result);
         } catch (error) {
-          reject(new Error(`Failed to parse Playwright results: ${error.message}`));
+          reject(new Error(`Failed to parse Playwright results: ${error instanceof Error ? error.message : String(error)}`));
         }
       });
 

@@ -302,7 +302,7 @@ export class JestAdapter implements TIAAdapter {
           const result = this.parseJestResults(stdout, stderr, code === 0);
           resolve(result);
         } catch (error) {
-          reject(new Error(`Failed to parse Jest results: ${error.message}`));
+          reject(new Error(`Failed to parse Jest results: ${error instanceof Error ? error.message : String(error)}`));
         }
       });
 

@@ -13,7 +13,6 @@
     "tia:watch": "tia watch"
   },
   "devDependencies": {
-    "@tia-js/cli": "^1.0.0",
     "cypress": "^13.0.0",
     "http-server": "^14.1.0",
     "start-server-and-test": "^2.0.0"

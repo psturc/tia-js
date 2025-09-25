@@ -240,7 +240,7 @@ export class CypressAdapter implements TIAAdapter {
           const result = this.parseCypressResults(stdout, stderr, code === 0);
           resolve(result);
         } catch (error) {
-          reject(new Error(`Failed to parse Cypress results: ${error.message}`));
+          reject(new Error(`Failed to parse Cypress results: ${error instanceof Error ? error.message : String(error)}`));
         }
       });
 

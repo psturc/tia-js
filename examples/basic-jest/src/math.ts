@@ -3,6 +3,7 @@
  */
 
 export function add(a: number, b: number): number {
+  // Simple addition function
   return a + b;
 }
 
