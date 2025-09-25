@@ -1,5 +1,6 @@
 import { CoverageAnalysisResult, TestFile, CoverageMap } from '@tia-js/common';
 import { CoverageStorage } from './coverage-storage';
+import { NYCCoverageReader } from './nyc-coverage-reader';
 import { createLogger, Logger } from '@tia-js/common';
 import * as path from 'path';
 
@@ -8,6 +9,7 @@ import * as path from 'path';
  */
 export class CoverageAnalyzer {
   private coverageStorage: CoverageStorage;
+  private nycReader: NYCCoverageReader;
   private logger: Logger;
   private rootDir: string;
 
@@ -15,6 +17,68 @@ export class CoverageAnalyzer {
     this.rootDir = rootDir;
     this.logger = logger;
     this.coverageStorage = new CoverageStorage(rootDir, logger);
+    this.nycReader = new NYCCoverageReader(rootDir, logger);
+  }
+
+  /**
+   * Analyze which tests are affected based on changed files and NYC coverage (if available)
+   */
+  async analyzeAffectedTestsWithNYC(
+    changedFiles: string[],
+    currentTestFile: string = 'current-test'
+  ): Promise<CoverageAnalysisResult> {
+    try {
+      this.logger.debug(`Analyzing NYC coverage for ${changedFiles.length} changed files`);
+      
+      // Check if NYC coverage is available
+      if (!this.nycReader.hasNYCCoverage()) {
+        this.logger.info('No NYC coverage found, falling back to TIA coverage storage');
+        return this.analyzeAffectedTests(changedFiles);
+      }
+
+      // Read covered files from NYC
+      const coveredFiles = await this.nycReader.readNYCCoverage();
+      this.logger.debug(`NYC covered files: ${coveredFiles.join(', ')}`);
+
+      // Check which changed files were covered
+      const affectedTestsMap = new Map<string, TestFile>();
+      
+      for (const changedFile of changedFiles) {
+        const normalizedChangedFile = this.normalizePath(changedFile);
+        const relativeChangedFile = path.relative(this.rootDir, normalizedChangedFile);
+        
+        if (coveredFiles.includes(relativeChangedFile)) {
+          this.logger.debug(`NYC coverage found for: ${relativeChangedFile}`);
+          
+          // For NYC coverage, we know this test covered the file
+          const testFile: TestFile = {
+            path: currentTestFile,
+            reason: 'coverage-direct',
+            priority: 90 // High priority for actual coverage
+          };
+          affectedTestsMap.set(currentTestFile, testFile);
+        }
+      }
+
+      const emptyCoverageMap: CoverageMap = {
+        tests: new Map(),
+        lastUpdated: Date.now(),
+        rootDir: this.rootDir
+      };
+
+      return {
+        affectedTests: Array.from(affectedTestsMap.values()),
+        coverageMap: emptyCoverageMap,
+        hasCoverageData: coveredFiles.length > 0,
+        fallbackStrategy: affectedTestsMap.size === 0 ? 'heuristic' : undefined
+      };
+
+    } catch (error) {
+      this.logger.error(`NYC coverage analysis failed: ${error instanceof Error ? error.message : String(error)}`);
+      
+      // Fall back to TIA coverage storage
+      return this.analyzeAffectedTests(changedFiles);
+    }
   }
 
   /**

@@ -23,6 +23,7 @@ h1 {
 .calculator {
     display: flex;
     flex-direction: column;
+    
     gap: 15px;
     margin-bottom: 30px;
     padding: 20px;

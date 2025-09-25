@@ -85,44 +85,35 @@ yarn tia run --use-coverage
 - ❌ **CSS change → Calculator + Navigation tests**
 - ❌ **JS change → Calculator + Navigation tests**
 
-### **Webpack Coverage-Based Approach**:
-- ✅ **calculator.js change → Only Calculator test** (1/2 tests)
-- ✅ **styles.css change → Only Navigation test** (1/2 tests)  
-- ✅ **index.html change → Both tests** (2/2 tests, as expected)
+### **Real Coverage-Based Approach**:
+- ✅ **JavaScript changes** → Tests that actually execute the changed code (from NYC coverage)
+- 🔄 **Asset changes** → Intelligent fallback (dependency analysis, heuristics)
+- 🎯 **Hybrid strategy** → NYC for JS, fallback for assets
 
-### **Real Results**:
+### **How to Test Coverage-Based TIA**:
 
-**Calculator Change**:
-```
-📊 Test Impact Analysis Results
-Summary:
-  Changed files: 1
-  Affected tests: 1 ← Only the test that covers calculator.js!
-  Total tests: 2
+1. **Run Cypress tests with coverage**:
+   ```bash
+   npm run test:coverage
+   ```
 
-Affected Tests:
-┌──────────────────────────────┬─────────────┬──────────┐
-│ Test File                    │ Reason      │ Priority │
-├──────────────────────────────┼─────────────┼──────────┤
-│ cypress/e2e/calculator.cy.js │ 📊 Coverage │ 🔴 100   │
-└──────────────────────────────┴─────────────┴──────────┘
-```
+2. **Check what files were covered**:
+   ```bash
+   yarn tia coverage stats
+   ```
 
-**CSS Change**:
-```
-📊 Test Impact Analysis Results  
-Summary:
-  Changed files: 1
-  Affected tests: 1 ← Only the test that covers styles.css!
-  Total tests: 2
+3. **Make a JavaScript change and analyze**:
+   ```bash
+   # Edit src/calculator.js
+   yarn tia analyze --use-coverage
+   ```
 
-Affected Tests:
-┌──────────────────────────────┬─────────────┬──────────┐
-│ Test File                    │ Reason      │ Priority │
-├──────────────────────────────┼─────────────┼──────────┤
-│ cypress/e2e/navigation.cy.js │ 📊 Coverage │ 🔴 100   │
-└──────────────────────────────┴─────────────┴──────────┘
-```
+4. **Compare with traditional analysis**:
+   ```bash
+   yarn tia analyze  # Traditional approach
+   ```
+
+The coverage-based approach will show **precise test selection** for JavaScript changes based on actual code execution tracked by Istanbul instrumentation.
 
 ## ⚙️ **Configuration Files**
 
