@@ -3,7 +3,7 @@
  */
 
 export const APP_CONFIG = {
-  version: '1.0.1', // Updated version for TIA test
+  version: '1.0.2', // Updated again for TIA coverage test
   apiUrl: 'https://api.example.com',
   debug: false
 };
