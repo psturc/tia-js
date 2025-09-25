@@ -104,3 +104,5 @@ class Calculator {
 document.addEventListener('DOMContentLoaded', () => {
     new Calculator();
 });
+
+// TIA test: This comment was added to trigger change detection

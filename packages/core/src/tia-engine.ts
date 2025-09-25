@@ -40,7 +40,7 @@ export class TIAEngine {
     this.logger = createLogger('info');
     this.dependencyAnalyzer = new DependencyAnalyzer(this.config);
     this.changeDetector = new ChangeDetector(this.config.rootDir);
-    this.coverageAnalyzer = new CoverageAnalyzer(this.config.rootDir, this.logger);
+    this.coverageAnalyzer = new CoverageAnalyzer(this.config.rootDir, this.dependencyAnalyzer, this.logger);
   }
 
   /**
@@ -75,8 +75,7 @@ export class TIAEngine {
       if (hasNYCCoverage && jsChanges.length > 0) {
         this.logger.info('Using NYC coverage for JavaScript changes');
         coverageAnalysis = await this.coverageAnalyzer.analyzeAffectedTestsWithNYC(
-          changedFiles.map(f => f.path),
-          'current-test' // This should be determined differently in real implementation
+          changedFiles.map(f => f.path)
         );
       } else {
         this.logger.info('Using TIA coverage storage');
