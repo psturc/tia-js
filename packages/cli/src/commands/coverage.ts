@@ -77,24 +77,30 @@ coverageCommand
       const coveredFiles = await nycReader.readNYCCoverage();
       const stats = await nycReader.getCoverageStats();
       
-      // For each covered file, find which tests would exercise it
-      const coverageAnalyzer = engine['coverageAnalyzer'];
-      const mapping = new Map<string, string[]>();
+      // Use enhanced per-test coverage mapping
+      const perTestAnalyzer = engine['perTestCoverageAnalyzer'];
+      const mapping = await perTestAnalyzer.getPerTestCoverageMapping();
       
-      for (const sourceFile of coveredFiles) {
-        const tests = await coverageAnalyzer['findTestsForSourceFile'](sourceFile);
-        mapping.set(sourceFile, tests);
+      // Convert to the format expected by display functions (source -> tests)
+      const sourceToTestMapping = new Map<string, string[]>();
+      for (const [testFile, sourceFiles] of mapping) {
+        for (const sourceFile of sourceFiles) {
+          if (!sourceToTestMapping.has(sourceFile)) {
+            sourceToTestMapping.set(sourceFile, []);
+          }
+          sourceToTestMapping.get(sourceFile)!.push(testFile);
+        }
       }
       
       spinner.succeed('Coverage mapping analyzed');
       
       if (options.format === 'json') {
-        console.log(JSON.stringify(Object.fromEntries(mapping), null, 2));
+        console.log(JSON.stringify(Object.fromEntries(sourceToTestMapping), null, 2));
       } else if (options.format === 'summary') {
-        displayMappingSummary(mapping, stats, coveredFiles);
+        displayMappingSummary(sourceToTestMapping, stats, coveredFiles);
       } else {
         // Table format (default)
-        displayMappingTable(mapping, stats);
+        displayMappingTable(sourceToTestMapping, stats);
       }
       
     } catch (error) {

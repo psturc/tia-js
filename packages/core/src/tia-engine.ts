@@ -23,6 +23,7 @@ import {
 import { DependencyAnalyzer } from './dependency-analyzer';
 import { ChangeDetector } from './change-detector';
 import { CoverageAnalyzer } from './coverage-analyzer';
+import { PerTestCoverageAnalyzer } from './per-test-coverage-analyzer';
 
 /**
  * Core Test Impact Analysis Engine
@@ -32,6 +33,7 @@ export class TIAEngine {
   private dependencyAnalyzer: DependencyAnalyzer;
   private changeDetector: ChangeDetector;
   private coverageAnalyzer: CoverageAnalyzer;
+  private perTestCoverageAnalyzer: PerTestCoverageAnalyzer;
   private logger: Logger;
   private adapters: Map<string, TIAAdapter> = new Map();
 
@@ -41,6 +43,7 @@ export class TIAEngine {
     this.dependencyAnalyzer = new DependencyAnalyzer(this.config);
     this.changeDetector = new ChangeDetector(this.config.rootDir);
     this.coverageAnalyzer = new CoverageAnalyzer(this.config.rootDir, this.dependencyAnalyzer, this.logger);
+    this.perTestCoverageAnalyzer = new PerTestCoverageAnalyzer(this.config.rootDir, this.logger);
   }
 
   /**
@@ -73,8 +76,8 @@ export class TIAEngine {
       
       let coverageAnalysis;
       if (hasNYCCoverage && jsChanges.length > 0) {
-        this.logger.info('Using NYC coverage for JavaScript changes');
-        coverageAnalysis = await this.coverageAnalyzer.analyzeAffectedTestsWithNYC(
+        this.logger.info('Using enhanced per-test coverage analysis');
+        coverageAnalysis = await this.perTestCoverageAnalyzer.analyzeWithPerTestMapping(
           changedFiles.map(f => f.path)
         );
       } else {

@@ -8,6 +8,7 @@ export { ChangeDetector } from './change-detector';
 export { CoverageAnalyzer } from './coverage-analyzer';
 export { CoverageStorage } from './coverage-storage';
 export { NYCCoverageReader } from './nyc-coverage-reader';
+export { PerTestCoverageAnalyzer } from './per-test-coverage-analyzer';
 
 // Re-export common types for convenience
 export * from '@tia-js/common';
