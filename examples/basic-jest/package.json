@@ -6,6 +6,7 @@
   "scripts": {
     "test": "jest",
     "test:watch": "jest --watch",
+    "tia": "tia",
     "tia:analyze": "tia analyze",
     "tia:run": "tia run",
     "tia:watch": "tia watch"

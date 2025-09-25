@@ -24,6 +24,7 @@ export const analyzeCommand = new Command('analyze')
   .option('--max-depth <number>', 'Maximum dependency analysis depth', '10')
   .option('--json', 'Output results as JSON', false)
   .option('--verbose', 'Verbose output', false)
+  .option('--fail-on-no-tests', 'Exit with code 1 if no affected tests found', false)
   .action(async (options) => {
     const spinner = ora('Initializing Test Impact Analysis...').start();
     
@@ -62,8 +63,12 @@ export const analyzeCommand = new Command('analyze')
         displayAnalysisResults(result, options.verbose);
       }
 
-      // Exit with appropriate code
-      process.exit(result.affectedTests.length > 0 ? 0 : 1);
+      // Exit with appropriate code based on options
+      if (options.failOnNoTests && result.affectedTests.length === 0) {
+        process.exit(1);
+      } else {
+        process.exit(0);
+      }
       
     } catch (error) {
       spinner.fail('Analysis failed');

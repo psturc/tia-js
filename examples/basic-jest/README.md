@@ -23,16 +23,34 @@ npm test
 
 ### Use TIA to analyze test impact
 ```bash
+# Short form (recommended)
+yarn tia:analyze
+# or even shorter
+yarn tia analyze
+
+# Long form
 npm run tia:analyze
 ```
 
 ### Run only affected tests
 ```bash
+# Short form (recommended)
+yarn tia:run
+# or
+yarn tia run
+
+# Long form  
 npm run tia:run
 ```
 
 ### Watch mode with TIA
 ```bash
+# Short form (recommended)
+yarn tia:watch
+# or
+yarn tia watch
+
+# Long form
 npm run tia:watch
 ```
 
