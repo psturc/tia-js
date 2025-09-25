@@ -7,6 +7,7 @@ class Calculator {
 
     initializeEventListeners() {
         document.getElementById('calculate').addEventListener('click', () => {
+            
             this.calculate();
         });
 

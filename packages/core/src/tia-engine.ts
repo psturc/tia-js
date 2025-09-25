@@ -181,7 +181,6 @@ export class TIAEngine {
 
     for (const changedFile of changedFiles) {
       const filePath = changedFile.path;
-      console.debug(`[DEBUG] Processing changed file: ${filePath}`);
 
       // If the changed file is a test file itself
       if (isTestFile(filePath)) {
@@ -189,19 +188,21 @@ export class TIAEngine {
         continue;
       }
 
+      // Special handling for E2E tests (Cypress, Playwright)
+      // E2E tests typically test the entire application, so any source change affects them
+      if (this.isSourceFileChange(filePath)) {
+        this.addE2ETests(testFiles, dependencyGraph);
+      }
+
       // Find all dependents of the changed file
       const dependents = dependencyGraph.getDependents(
         filePath, 
         this.config.maxDepth || 10
       );
-      console.debug(`[DEBUG] Dependents of ${filePath}:`, dependents);
-
       // Add test files that depend on the changed file
       for (const dependent of dependents) {
-        console.debug(`[DEBUG] Checking dependent: ${dependent}, isTest: ${isTestFile(dependent)}`);
         if (isTestFile(dependent)) {
           testFiles.add(dependent);
-          console.debug(`[DEBUG] Added test file: ${dependent}`);
         }
       }
 
@@ -321,6 +322,41 @@ export class TIAEngine {
       }
     }
     return null;
+  }
+
+  /**
+   * Check if a file change is a source file that could affect E2E tests
+   */
+  private isSourceFileChange(filePath: string): boolean {
+    const sourceExtensions = this.config.sourceExtensions || ['.js', '.ts', '.tsx', '.jsx', '.html', '.css'];
+    const extension = path.extname(filePath).toLowerCase();
+    
+    return sourceExtensions.includes(extension) && 
+           !isTestFile(filePath) &&
+           !filePath.includes('node_modules') &&
+           !filePath.includes('.git/');
+  }
+
+  /**
+   * Add E2E tests (Cypress, Playwright) to the affected tests list
+   * E2E tests test the entire application, so they're affected by most source changes
+   */
+  private addE2ETests(testFiles: Set<string>, dependencyGraph: DependencyGraph): void {
+    for (const [testPath, node] of dependencyGraph.nodes) {
+      if (node.isTest && this.isE2ETest(testPath)) {
+        testFiles.add(testPath);
+      }
+    }
+  }
+
+  /**
+   * Check if a test file is an E2E test (Cypress or Playwright)
+   */
+  private isE2ETest(filePath: string): boolean {
+    return filePath.includes('/cypress/') || 
+           filePath.includes('/e2e/') ||
+           filePath.includes('.cy.') ||
+           filePath.includes('.spec.') && (filePath.includes('/playwright/') || filePath.includes('/tests/'));
   }
 
   /**

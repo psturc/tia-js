@@ -99,6 +99,7 @@ export function isTestFile(filePath: string): boolean {
   const testPatterns = [
     /\.test\./,
     /\.spec\./,
+    /\.cy\./,     // Cypress test files
     /_test\./,
     /_spec\./,
     /^test_/,
@@ -110,7 +111,9 @@ export function isTestFile(filePath: string): boolean {
          filePath.includes('/tests/') ||
          filePath.includes('/__tests__/') ||
          filePath.includes('/spec/') ||
-         filePath.includes('/specs/');
+         filePath.includes('/specs/') ||
+         (filePath.includes('/cypress/') && 
+          (filePath.includes('/e2e/') || filePath.includes('/integration/') || basename.includes('.cy.')));
 }
 
 /**

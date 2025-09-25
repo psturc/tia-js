@@ -62,7 +62,7 @@ export class ChangeDetector {
    * Get committed changes compared to base
    */
   private async getCommittedChanges(base: string): Promise<ChangedFile[]> {
-    const output = await this.runGitCommand(['diff', '--name-status', base]);
+    const output = await this.runGitCommand(['diff', '--name-status', '--relative', base]);
     return this.parseGitDiffOutput(output);
   }
 
@@ -70,7 +70,7 @@ export class ChangeDetector {
    * Get unstaged changes
    */
   private async getUnstagedChanges(): Promise<ChangedFile[]> {
-    const output = await this.runGitCommand(['diff', '--name-status']);
+    const output = await this.runGitCommand(['diff', '--name-status', '--relative']);
     return this.parseGitDiffOutput(output);
   }
 
@@ -128,10 +128,8 @@ export class ChangeDetector {
           changeType = 'modified';
       }
 
-      // Ensure the path is resolved relative to the correct root
-      const resolvedPath = path.isAbsolute(filePath) ? filePath : path.resolve(this.rootDir, filePath);
       changes.push({
-        path: resolvedPath,
+        path: path.resolve(this.rootDir, filePath),
         changeType,
         previousPath
       });

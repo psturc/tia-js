@@ -8,6 +8,7 @@
     "cy:open": "cypress open",
     "cy:run": "cypress run",
     "test": "start-server-and-test dev 3000 cy:run",
+    "tia": "tia",
     "tia:analyze": "tia analyze",
     "tia:run": "tia run",
     "tia:watch": "tia watch"

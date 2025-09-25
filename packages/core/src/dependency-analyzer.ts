@@ -56,10 +56,6 @@ export class DependencyAnalyzer {
       const node = this.graph.get(normalizedPath);
       if (node) {
         node.dependencies = dependencies;
-        // Debug logging
-        if (dependencies.length > 0) {
-          console.debug(`[DEBUG] ${normalizedPath} depends on:`, dependencies);
-        }
       }
     } catch (error) {
       // Skip files that can't be read
@@ -74,7 +70,12 @@ export class DependencyAnalyzer {
   private extractDependencies(content: string, filePath: string): string[] {
     const dependencies: Set<string> = new Set();
     
-    // Patterns for different import/require styles
+    // Check if this is an HTML file
+    if (filePath.endsWith('.html')) {
+      return this.extractHtmlDependencies(content, filePath);
+    }
+    
+    // Patterns for different import/require styles in JavaScript/TypeScript
     const patterns = [
       // ES6 imports
       /import\s+.*?\s+from\s+['"`]([^'"`]+)['"`]/g,
@@ -91,9 +92,46 @@ export class DependencyAnalyzer {
       let match;
       while ((match = pattern.exec(content)) !== null) {
         const importPath = match[1];
-        console.debug(`[DEBUG] Found import "${importPath}" in ${filePath}`);
         const resolvedPath = this.resolveImport(importPath, filePath);
-        console.debug(`[DEBUG] Resolved to: ${resolvedPath}`);
+        if (resolvedPath) {
+          dependencies.add(resolvedPath);
+        }
+      }
+    }
+
+    return Array.from(dependencies);
+  }
+
+  /**
+   * Extract dependencies from HTML files (script tags, link tags, etc.)
+   */
+  private extractHtmlDependencies(content: string, filePath: string): string[] {
+    const dependencies: Set<string> = new Set();
+    
+    // Patterns for HTML dependencies
+    const patterns = [
+      // Script tags: <script src="path"></script>
+      /<script[^>]+src\s*=\s*['"`]([^'"`]+)['"`]/gi,
+      // Link tags for stylesheets: <link rel="stylesheet" href="path">
+      /<link[^>]+href\s*=\s*['"`]([^'"`]+)['"`][^>]*rel\s*=\s*['"`]stylesheet['"`]/gi,
+      /<link[^>]+rel\s*=\s*['"`]stylesheet['"`][^>]*href\s*=\s*['"`]([^'"`]+)['"`]/gi,
+      // Link tags for other resources
+      /<link[^>]+href\s*=\s*['"`]([^'"`]+)['"`]/gi,
+    ];
+
+    for (const pattern of patterns) {
+      let match;
+      while ((match = pattern.exec(content)) !== null) {
+        const resourcePath = match[1];
+        
+        // Skip external URLs (http://, https://, //)
+        if (resourcePath.startsWith('http://') || 
+            resourcePath.startsWith('https://') || 
+            resourcePath.startsWith('//')) {
+          continue;
+        }
+        
+        const resolvedPath = this.resolveImport(resourcePath, filePath);
         if (resolvedPath) {
           dependencies.add(resolvedPath);
         }
