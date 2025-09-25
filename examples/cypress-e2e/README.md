@@ -115,6 +115,18 @@ yarn tia run --use-coverage
 
 The coverage-based approach will show **precise test selection** for JavaScript changes based on actual code execution tracked by Istanbul instrumentation.
 
+### **Real-World Workflow**:
+
+This example starts with **no coverage data** (authentic state). The workflow is:
+
+1. **First run** → TIA falls back to traditional analysis
+2. **Run tests with coverage** → `.nyc_output/out.json` gets created
+3. **Subsequent analysis** → TIA uses real coverage data for precision
+4. **JavaScript changes** → Surgical test selection based on actual execution
+5. **Asset changes** → Intelligent fallback strategies
+
+This demonstrates how TIA **gracefully degrades** when coverage is unavailable and **upgrades precision** when real coverage data exists.
+
 ## ⚙️ **Configuration Files**
 
 ### **webpack.config.js** - Production Build
