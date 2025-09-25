@@ -26,67 +26,93 @@ beforeEach(() => {
 
 afterEach(() => {
   // Collect coverage data after each test
-  if (window.__coverage__) {
-    const executedFiles = Object.keys(window.__coverage__)
-      .filter(file => {
-        // Filter to only source files (not test files or node_modules)
-        return !file.includes('node_modules') && 
-               !file.includes('cypress') &&
-               !file.endsWith('.cy.js') &&
-               !file.endsWith('.spec.js');
-      })
-      .map(file => {
-        // Convert to relative path from project root
-        if (file.includes('/src/')) {
-          return file.substring(file.indexOf('/src/') + 1);
-        }
-        return file;
-      });
+  cy.window().then((win) => {
+    if (win.__coverage__) {
+      const executedFiles = Object.keys(win.__coverage__)
+        .filter(file => {
+          // Filter to only source files (not test files, node_modules, or webpack runtime)
+          return !file.includes('node_modules') && 
+                 !file.includes('cypress') &&
+                 !file.includes('webpack') &&
+                 !file.endsWith('.cy.js') &&
+                 !file.endsWith('.spec.js') &&
+                 file.includes('/src/'); // Only include actual source files
+        })
+        .map(file => {
+          // Convert to relative path from project root
+          // Extract just the src/ relative path
+          const srcIndex = file.indexOf('/src/');
+          if (srcIndex !== -1) {
+            return file.substring(srcIndex + 1);
+          }
+          // Fallback: if it's already a relative path starting with src/
+          if (file.startsWith('src/')) {
+            return file;
+          }
+          return file;
+        });
 
-    const metadata = {
-      duration: Date.now() - testStartTime,
-      status: 'passed', // Will be overridden if test fails
-      testName: Cypress.currentTest?.title || 'unknown'
-    };
+      const metadata = {
+        duration: Date.now() - testStartTime,
+        status: 'passed', // Will be overridden if test fails
+        testName: Cypress.currentTest?.title || 'unknown',
+        coverageEntries: Object.keys(win.__coverage__).length
+      };
 
-    // Store coverage data
-    cy.task('tia:storeCoverage', {
-      testFile: currentTestFile,
-      executedFiles,
-      metadata
-    }, { log: false });
-  }
+      // Only store if we found some source files
+      if (executedFiles.length > 0) {
+        cy.task('tia:storeCoverage', {
+          testFile: currentTestFile,
+          executedFiles,
+          metadata
+        }, { log: false });
+      }
+    }
+  });
 });
 
-// Update status on test failure
+// Update status on test failure  
 Cypress.on('test:after:run', (test) => {
-  if (test.state === 'failed' && window.__coverage__) {
-    const executedFiles = Object.keys(window.__coverage__)
-      .filter(file => {
-        return !file.includes('node_modules') && 
-               !file.includes('cypress') &&
-               !file.endsWith('.cy.js') &&
-               !file.endsWith('.spec.js');
-      })
-      .map(file => {
-        if (file.includes('/src/')) {
-          return file.substring(file.indexOf('/src/') + 1);
+  if (test.state === 'failed') {
+    cy.window().then((win) => {
+      if (win.__coverage__) {
+        const executedFiles = Object.keys(win.__coverage__)
+          .filter(file => {
+            return !file.includes('node_modules') && 
+                   !file.includes('cypress') &&
+                   !file.includes('webpack') &&
+                   !file.endsWith('.cy.js') &&
+                   !file.endsWith('.spec.js') &&
+                   file.includes('/src/');
+          })
+          .map(file => {
+            const srcIndex = file.indexOf('/src/');
+            if (srcIndex !== -1) {
+              return file.substring(srcIndex + 1);
+            }
+            if (file.startsWith('src/')) {
+              return file;
+            }
+            return file;
+          });
+
+        const metadata = {
+          duration: Date.now() - testStartTime,
+          status: 'failed',
+          testName: test.title,
+          error: test.err?.message,
+          coverageEntries: Object.keys(win.__coverage__).length
+        };
+
+        if (executedFiles.length > 0) {
+          cy.task('tia:storeCoverage', {
+            testFile: currentTestFile,
+            executedFiles,
+            metadata
+          }, { log: false });
         }
-        return file;
-      });
-
-    const metadata = {
-      duration: Date.now() - testStartTime,
-      status: 'failed',
-      testName: test.title,
-      error: test.err?.message
-    };
-
-    cy.task('tia:storeCoverage', {
-      testFile: currentTestFile,
-      executedFiles,
-      metadata
-    }, { log: false });
+      }
+    });
   }
 });
 

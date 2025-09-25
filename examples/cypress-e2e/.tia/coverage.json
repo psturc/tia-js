@@ -3,15 +3,14 @@
     "cypress/e2e/calculator.cy.js": {
       "testFile": "cypress/e2e/calculator.cy.js",
       "executedFiles": [
-        "src/calculator.js",
-        "src/index.html"
+        "src/calculator.js"
       ],
-      "timestamp": 1758800998497,
+      "timestamp": 1758802070688,
       "framework": "cypress",
       "metadata": {
-        "duration": 2500,
+        "duration": 2800,
         "status": "passed",
-        "testName": "Calculator Tests"
+        "testName": "Calculator Tests - Webpack Instrumented"
       }
     },
     "cypress/e2e/navigation.cy.js": {
@@ -20,15 +19,15 @@
         "src/index.html",
         "src/styles.css"
       ],
-      "timestamp": 1758800998498,
+      "timestamp": 1758802070697,
       "framework": "cypress",
       "metadata": {
-        "duration": 1200,
+        "duration": 1500,
         "status": "passed",
-        "testName": "Navigation Tests"
+        "testName": "Navigation Tests - Webpack Instrumented"
       }
     }
   },
-  "lastUpdated": 1758800998498,
+  "lastUpdated": 1758802070697,
   "rootDir": "/Users/psturc/dev/tia-js/examples/cypress-e2e"
 }

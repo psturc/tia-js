@@ -10,6 +10,7 @@ import { analyzeCommand } from '../commands/analyze';
 import { runCommand } from '../commands/run';
 import { watchCommand } from '../commands/watch';
 import { initCommand } from '../commands/init';
+import { coverageCommand } from '../commands/coverage';
 
 const program = new Command();
 
@@ -27,6 +28,7 @@ program.addCommand(initCommand);
 program.addCommand(analyzeCommand);
 program.addCommand(runCommand);
 program.addCommand(watchCommand);
+program.addCommand(coverageCommand);
 
 // Add global options
 program

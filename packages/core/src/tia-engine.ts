@@ -22,6 +22,7 @@ import {
 } from '@tia-js/common';
 import { DependencyAnalyzer } from './dependency-analyzer';
 import { ChangeDetector } from './change-detector';
+import { CoverageAnalyzer } from './coverage-analyzer';
 
 /**
  * Core Test Impact Analysis Engine
@@ -30,14 +31,16 @@ export class TIAEngine {
   private config: TIAConfig;
   private dependencyAnalyzer: DependencyAnalyzer;
   private changeDetector: ChangeDetector;
+  private coverageAnalyzer: CoverageAnalyzer;
   private logger: Logger;
   private adapters: Map<string, TIAAdapter> = new Map();
 
   constructor(config: TIAConfig) {
     this.config = this.normalizeConfig(config);
+    this.logger = createLogger('info');
     this.dependencyAnalyzer = new DependencyAnalyzer(this.config);
     this.changeDetector = new ChangeDetector(this.config.rootDir);
-    this.logger = createLogger('info');
+    this.coverageAnalyzer = new CoverageAnalyzer(this.config.rootDir, this.logger);
   }
 
   /**
@@ -49,7 +52,95 @@ export class TIAEngine {
   }
 
   /**
-   * Run Test Impact Analysis
+   * Run Test Impact Analysis with coverage-based analysis
+   */
+  async analyzeCoverage(options: ChangeDetectionOptions = {}): Promise<TIAResult> {
+    const startTime = Date.now();
+    this.logger.info('Starting Test Impact Analysis with coverage...');
+
+    try {
+      // Step 1: Detect changes
+      this.logger.info('Detecting file changes...');
+      const changedFiles = await this.changeDetector.detectChanges(options);
+      this.logger.info(`Found ${changedFiles.length} changed files`);
+
+      // Step 2: Analyze using coverage data
+      this.logger.info('Analyzing coverage data...');
+      const coverageAnalysis = await this.coverageAnalyzer.analyzeAffectedTests(
+        changedFiles.map(f => f.path),
+        'heuristic' // fallback to heuristic if no coverage
+      );
+
+      let affectedTests = coverageAnalysis.affectedTests;
+
+      // Step 3: If no coverage data or fallback needed, use traditional analysis
+      if (!coverageAnalysis.hasCoverageData || coverageAnalysis.fallbackStrategy === 'heuristic') {
+        this.logger.info('Using traditional dependency analysis as fallback...');
+        
+        // Find all source and test files
+        const allFiles = await this.findAllFiles();
+        
+        // Build dependency graph
+        const dependencyGraph = await this.dependencyAnalyzer.buildGraph(allFiles);
+        
+        // Calculate affected tests using traditional method
+        const traditionalTests = this.calculateAffectedTests(changedFiles, dependencyGraph);
+        
+        // Merge with coverage-based results
+        const testMap = new Map<string, TestFile>();
+        
+        // Add coverage-based tests (higher priority)
+        affectedTests.forEach(test => testMap.set(test.path, test));
+        
+        // Add traditional tests (lower priority if not already covered)
+        traditionalTests.forEach(test => {
+          if (!testMap.has(test.path)) {
+            testMap.set(test.path, {
+              ...test,
+              reason: test.reason,
+              priority: Math.max(0, test.priority - 10) // Lower priority
+            });
+          }
+        });
+        
+        affectedTests = Array.from(testMap.values());
+      }
+
+      const analysisTime = Date.now() - startTime;
+      const currentCommit = await this.changeDetector.getCurrentCommit();
+
+      // Get coverage stats
+      const coverageStats = await this.coverageAnalyzer.getCoverageStats();
+
+      const result: TIAResult = {
+        changedFiles,
+        affectedTests,
+        totalTests: coverageStats.totalTests || affectedTests.length,
+        metadata: {
+          analysisTime,
+          baseCommit: currentCommit || undefined,
+          usedCoverage: coverageAnalysis.hasCoverageData,
+          coverageStats: {
+            totalTests: coverageStats.totalTests,
+            totalSourceFiles: coverageStats.totalSourceFiles,
+            averageFilesPerTest: Math.round(coverageStats.averageFilesPerTest * 100) / 100,
+            lastUpdated: new Date(coverageStats.lastUpdated).toISOString()
+          },
+          fallbackStrategy: coverageAnalysis.fallbackStrategy
+        }
+      };
+
+      this.logger.info(`Analysis completed in ${analysisTime}ms`);
+      return result;
+
+    } catch (error) {
+      this.logger.error(`Test Impact Analysis failed: ${error instanceof Error ? error.message : String(error)}`);
+      throw error;
+    }
+  }
+
+  /**
+   * Run Test Impact Analysis (traditional dependency-based)
    */
   async analyze(options: ChangeDetectionOptions = {}): Promise<TIAResult> {
     const startTime = Date.now();
@@ -85,9 +176,10 @@ export class TIAEngine {
         totalTests: allFiles.filter(f => isTestFile(f)).length,
         metadata: {
           analysisTime,
-          baseCommit: options.base || currentCommit || 'HEAD',
+          baseCommit: options.base || currentCommit || undefined,
           framework: 'core',
-          config: this.config
+          config: this.config,
+          usedCoverage: false
         }
       };
 
@@ -372,5 +464,36 @@ export class TIAEngine {
     };
 
     return deepMerge(defaultConfig, config) as TIAConfig;
+  }
+
+  /**
+   * Store coverage data for a test
+   */
+  async storeCoverageData(testFile: string, executedFiles: string[], framework: string, metadata?: any): Promise<void> {
+    const coverageData = {
+      testFile,
+      executedFiles,
+      timestamp: Date.now(),
+      framework,
+      metadata
+    };
+    
+    await this.coverageAnalyzer['coverageStorage'].storeCoverageData(coverageData);
+    this.logger.debug(`Stored coverage data for ${testFile}`);
+  }
+
+  /**
+   * Get coverage statistics
+   */
+  async getCoverageStats() {
+    return this.coverageAnalyzer.getCoverageStats();
+  }
+
+  /**
+   * Clear all coverage data
+   */
+  async clearCoverageData(): Promise<void> {
+    await this.coverageAnalyzer.clearCoverageData();
+    this.logger.info('Cleared all coverage data');
   }
 }

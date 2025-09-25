@@ -8,6 +8,7 @@ export * from './commands/analyze';
 export * from './commands/run';
 export * from './commands/watch';
 export * from './commands/init';
+export * from './commands/coverage';
 
 // Re-export core functionality
 export * from '@tia-js/core';

@@ -1,11 +1,22 @@
 {
-  "plugins": [
-    ["istanbul", {
-      "exclude": [
-        "**/*.cy.js",
-        "**/cypress/**",
-        "**/node_modules/**"
+  "presets": ["@babel/preset-env"],
+  "env": {
+    "test": {
+      "plugins": [
+        [
+          "babel-plugin-istanbul",
+          {
+            "exclude": [
+              "**/*.test.js",
+              "**/*.spec.js", 
+              "**/*.cy.js",
+              "**/cypress/**",
+              "**/node_modules/**",
+              "**/dist/**"
+            ]
+          }
+        ]
       ]
-    }]
-  ]
+    }
+  }
 }

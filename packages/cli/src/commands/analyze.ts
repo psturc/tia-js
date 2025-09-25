@@ -25,6 +25,7 @@ export const analyzeCommand = new Command('analyze')
   .option('--json', 'Output results as JSON', false)
   .option('--verbose', 'Verbose output', false)
   .option('--fail-on-no-tests', 'Exit with code 1 if no affected tests found', false)
+  .option('--use-coverage', 'Use coverage-based analysis (requires prior test runs with coverage)', false)
   .action(async (options) => {
     const spinner = ora('Initializing Test Impact Analysis...').start();
     
@@ -48,11 +49,17 @@ export const analyzeCommand = new Command('analyze')
       spinner.text = 'Analyzing file changes and dependencies...';
       
       // Run analysis
-      const result = await engine.analyze({
-        base: options.base,
-        includeUnstaged: options.includeUnstaged,
-        includeUntracked: options.includeUntracked
-      });
+      const result = options.useCoverage 
+        ? await engine.analyzeCoverage({
+            base: options.base,
+            includeUnstaged: options.includeUnstaged,
+            includeUntracked: options.includeUntracked
+          })
+        : await engine.analyze({
+            base: options.base,
+            includeUnstaged: options.includeUnstaged,
+            includeUntracked: options.includeUntracked
+          });
 
       spinner.succeed('Analysis completed');
 
@@ -179,3 +186,4 @@ function getPriorityIcon(priority: number): string {
   if (priority >= 40) return chalk.blue('🔵');
   return chalk.gray('⚪');
 }
+

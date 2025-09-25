@@ -41,6 +41,7 @@ h1 {
 
 .calculator button {
     background: #007bff;
+    /* Coverage-based TIA test - this should only affect navigation tests */
     color: white;
     cursor: pointer;
     transition: background-color 0.3s;

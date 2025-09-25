@@ -31,13 +31,6 @@
         </div>
     </div>
 
-    <script src="calculator.instrumented.js"></script>
-    <!-- Code coverage instrumentation for TIA -->
-    <script>
-      // Enable code coverage collection
-      if (window.Cypress) {
-        window.__coverage__ = window.__coverage__ || {};
-      }
-    </script>
+    <!-- Webpack will inject the bundled JavaScript automatically -->
 </body>
 </html>

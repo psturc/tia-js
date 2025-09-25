@@ -79,6 +79,8 @@ export function formatTestReason(reason: string): string {
       return chalk.magenta('🔒 Forced');
     case 'new-test':
       return chalk.cyan('✨ New test');
+    case 'coverage-direct':
+      return chalk.green('📊 Coverage');
     default:
       return chalk.gray('❓ Unknown');
   }

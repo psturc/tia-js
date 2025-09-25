@@ -37,7 +37,8 @@ export type TestImpactReason =
   | 'test-file-changed'      // The test file itself was changed
   | 'config-changed'         // Configuration files changed (run all tests)
   | 'forced'                 // Manually forced to run
-  | 'new-test';              // New test file added
+  | 'new-test'               // New test file added
+  | 'coverage-direct';       // Test covered the changed file (coverage-based analysis)
 
 /**
  * Configuration for Test Impact Analysis
@@ -114,9 +115,20 @@ export interface TIAResult {
     /** Git commit hash or reference used */
     baseCommit?: string;
     /** Framework used for analysis */
-    framework: string;
+    framework?: string;
     /** Configuration used */
-    config: TIAConfig;
+    config?: TIAConfig;
+    /** Whether coverage-based analysis was used */
+    usedCoverage?: boolean;
+    /** Coverage statistics if available */
+    coverageStats?: {
+      totalTests: number;
+      totalSourceFiles: number;
+      averageFilesPerTest: number;
+      lastUpdated: string;
+    };
+    /** Fallback strategy used if coverage unavailable */
+    fallbackStrategy?: 'heuristic' | 'all-tests' | 'none';
   };
 }
 
@@ -210,4 +222,53 @@ export interface DependencyGraph {
   getDependencies(filePath: string, maxDepth?: number): string[];
   /** Get all dependents of a file (direct and indirect) */
   getDependents(filePath: string, maxDepth?: number): string[];
+}
+
+/**
+ * Coverage data for a single test execution
+ */
+export interface TestCoverageData {
+  /** Test file path */
+  testFile: string;
+  /** Source files that were executed during this test */
+  executedFiles: string[];
+  /** Timestamp when coverage was collected */
+  timestamp: number;
+  /** Test framework used */
+  framework: string;
+  /** Additional metadata */
+  metadata?: {
+    /** Test duration */
+    duration?: number;
+    /** Test status */
+    status?: 'passed' | 'failed' | 'skipped';
+    /** Coverage percentage */
+    coveragePercentage?: number;
+  };
+}
+
+/**
+ * Coverage map for all tests
+ */
+export interface CoverageMap {
+  /** Coverage data for each test */
+  tests: Map<string, TestCoverageData>;
+  /** Last updated timestamp */
+  lastUpdated: number;
+  /** Project root directory */
+  rootDir: string;
+}
+
+/**
+ * Coverage analysis result
+ */
+export interface CoverageAnalysisResult {
+  /** Tests affected based on coverage */
+  affectedTests: TestFile[];
+  /** Coverage map used for analysis */
+  coverageMap: CoverageMap;
+  /** Whether coverage data was available */
+  hasCoverageData: boolean;
+  /** Fallback strategy used if no coverage */
+  fallbackStrategy?: 'heuristic' | 'all-tests' | 'none';
 }
