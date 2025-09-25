@@ -40,9 +40,10 @@ class Calculator {
         let operationSymbol;
 
         switch (operation) {
-            case 'add':
-                result = num1 + num2;
-                operationSymbol = '+';
+        case 'add':
+            result = num1 + num2;
+            operationSymbol = '+';
+            console.log('Addition performed:', result);
                 break;
             case 'subtract':
                 result = num1 - num2;
