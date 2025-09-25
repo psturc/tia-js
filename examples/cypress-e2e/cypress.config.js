@@ -17,8 +17,37 @@ export default defineConfig({
         console.warn('[Coverage] Code coverage plugin failed to load:', error.message);
       }
       
-      // Note: TIA now reads coverage data directly from .nyc_output/out.json
-      // No custom tasks needed - @cypress/code-coverage handles everything
+      // Per-test coverage collection for TIA
+      on('task', {
+        saveCoveragePerTest({ testName, specName, coverage }) {
+          try {
+            const fs = require('fs');
+            const path = require('path');
+            
+            // Create per-test coverage directory
+            const outDir = path.join(process.cwd(), '.nyc_output', 'per-test');
+            if (!fs.existsSync(outDir)) {
+              fs.mkdirSync(outDir, { recursive: true });
+            }
+            
+            // Create safe filename from test name
+            const safeTestName = testName.replace(/[^a-zA-Z0-9]/g, '_');
+            const safeSpecName = specName.replace(/[^a-zA-Z0-9]/g, '_');
+            const fileName = `${safeSpecName}__${safeTestName}.json`;
+            
+            // Save coverage data
+            const filePath = path.join(outDir, fileName);
+            fs.writeFileSync(filePath, JSON.stringify(coverage, null, 2));
+            
+            console.log(`[TIA] Saved per-test coverage: ${fileName}`);
+            return null;
+            
+          } catch (error) {
+            console.error('[TIA] Failed to save per-test coverage:', error.message);
+            return null;
+          }
+        }
+      });
 
       return config;
     },

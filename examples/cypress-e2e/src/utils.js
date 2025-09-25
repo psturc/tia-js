@@ -1,5 +1,5 @@
 /**
- * Utility functions for the application
+ * Utility functions for the application (modified for per-test TIA demo)
  */
 
 export function formatNumber(num) {

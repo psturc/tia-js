@@ -15,8 +15,33 @@ Cypress.on('uncaught:exception', (err, runnable) => {
   return false;
 });
 
-// Note: TIA now reads coverage data directly from .nyc_output/out.json
-// The @cypress/code-coverage plugin above handles all coverage collection automatically
+// Per-test coverage collection for TIA
+beforeEach(() => {
+  // Reset coverage tracking for each test
+  cy.window().then((win) => {
+    if (win.__coverage__) {
+      // Store reference to previous coverage but reset for this test
+      win.__previousCoverage = win.__coverage__;
+      win.__coverage__ = {};
+    }
+  });
+});
+
+afterEach(function () {
+  // Collect coverage data after each test
+  const testName = this.currentTest?.fullTitle() || 'unknown-test';
+  const specName = Cypress.spec.relative;
+  
+  cy.window().then((win) => {
+    if (win.__coverage__) {
+      cy.task('saveCoveragePerTest', {
+        testName,
+        specName,
+        coverage: win.__coverage__
+      }, { log: false });
+    }
+  });
+});
 
 // Custom commands can be added here
 Cypress.Commands.add('performCalculation', (num1, operation, num2) => {

@@ -70,21 +70,29 @@ export class TIAEngine {
       // Step 2: Analyze using coverage data (try NYC first, then TIA storage)
       this.logger.info('Analyzing coverage data...');
       
-      // Check if we have NYC coverage and any JS files changed
-      const jsChanges = changedFiles.filter(f => f.path.endsWith('.js'));
+      // Check what coverage data is available (prioritize TIA storage for accuracy)
+      const coverageMap = await this.coverageAnalyzer['coverageStorage'].loadCoverageMap();
+      const hasTIACoverage = coverageMap.tests.size > 0;
       const hasNYCCoverage = this.coverageAnalyzer['nycReader'].hasNYCCoverage();
+      const jsChanges = changedFiles.filter(f => f.path.endsWith('.js'));
       
       let coverageAnalysis;
-      if (hasNYCCoverage && jsChanges.length > 0) {
-        this.logger.info('Using enhanced per-test coverage analysis');
+      if (hasTIACoverage) {
+        this.logger.info('Using precise TIA per-test coverage data');
+        coverageAnalysis = await this.coverageAnalyzer.analyzeAffectedTests(
+          changedFiles.map(f => f.path),
+          'heuristic'
+        );
+      } else if (hasNYCCoverage && jsChanges.length > 0) {
+        this.logger.info('Using NYC-based coverage analysis');
         coverageAnalysis = await this.perTestCoverageAnalyzer.analyzeWithPerTestMapping(
           changedFiles.map(f => f.path)
         );
       } else {
-        this.logger.info('Using TIA coverage storage');
+        this.logger.info('No coverage data available, using heuristic analysis');
         coverageAnalysis = await this.coverageAnalyzer.analyzeAffectedTests(
           changedFiles.map(f => f.path),
-          'heuristic' // fallback to heuristic if no coverage
+          'heuristic'
         );
       }
 

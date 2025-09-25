@@ -93,7 +93,20 @@ function displayAnalysisResults(result: TIAResult, verbose: boolean): void {
   console.log();
   console.log(chalk.bold('Summary:'));
   console.log(`  Changed files: ${chalk.yellow(result.changedFiles.length)}`);
-  console.log(`  Affected tests: ${chalk.green(result.affectedTests.length)}`);
+  // Check if we have per-test granularity for summary
+  const hasPerTestGranularity = result.affectedTests.some(test => test.path.includes('::'));
+  
+  if (hasPerTestGranularity) {
+    const individualTests = result.affectedTests.filter(test => test.path.includes('::')).length;
+    const testFiles = new Set(result.affectedTests.map(test => 
+      test.path.includes('::') ? test.path.split('::')[0] : test.path
+    )).size;
+    
+    console.log(`  Affected tests: ${chalk.green(individualTests)} (in ${chalk.gray(testFiles)} files)`);
+  } else {
+    console.log(`  Affected tests: ${chalk.green(result.affectedTests.length)}`);
+  }
+  
   console.log(`  Total tests: ${chalk.gray(result.totalTests)}`);
   console.log(`  Analysis time: ${chalk.cyan(formatDuration(result.metadata.analysisTime))}`);
   
@@ -120,18 +133,45 @@ function displayAnalysisResults(result: TIAResult, verbose: boolean): void {
   // Affected tests
   if (result.affectedTests.length > 0) {
     console.log();
-    console.log(chalk.bold('Affected Tests:'));
     
-    const testTable = createTable(['Test File', 'Reason', 'Priority']);
+    // Check if we have per-test granularity (any test contains ::)
+    const hasPerTestGranularity = result.affectedTests.some(test => test.path.includes('::'));
     
-    for (const test of result.affectedTests) {
-      const relativePath = test.path.replace(process.cwd() + '/', '');
-      const reason = formatTestReason(test.reason);
-      const priority = getPriorityIcon(test.priority) + ' ' + test.priority;
-      testTable.push([relativePath, reason, priority]);
+    if (hasPerTestGranularity) {
+      console.log(chalk.bold('Affected Tests:'));
+      const testTable = createTable(['Test Name', 'Test File', 'Reason', 'Priority']);
+      
+      for (const test of result.affectedTests) {
+        if (test.path.includes('::')) {
+          const [specFile, testName] = test.path.split('::', 2);
+          const relativePath = specFile.replace(process.cwd() + '/', '');
+          const reason = formatTestReason(test.reason);
+          const priority = getPriorityIcon(test.priority) + ' ' + test.priority;
+          testTable.push([testName, relativePath, reason, priority]);
+        } else {
+          // Legacy format
+          const relativePath = test.path.replace(process.cwd() + '/', '');
+          const reason = formatTestReason(test.reason);
+          const priority = getPriorityIcon(test.priority) + ' ' + test.priority;
+          testTable.push(['(entire file)', relativePath, reason, priority]);
+        }
+      }
+      
+      console.log(testTable.toString());
+    } else {
+      // Original file-based display
+      console.log(chalk.bold('Affected Tests:'));
+      const testTable = createTable(['Test File', 'Reason', 'Priority']);
+      
+      for (const test of result.affectedTests) {
+        const relativePath = test.path.replace(process.cwd() + '/', '');
+        const reason = formatTestReason(test.reason);
+        const priority = getPriorityIcon(test.priority) + ' ' + test.priority;
+        testTable.push([relativePath, reason, priority]);
+      }
+      
+      console.log(testTable.toString());
     }
-    
-    console.log(testTable.toString());
 
     // Verbose output
     if (verbose && result.affectedTests.length > 0) {

@@ -23,7 +23,7 @@ describe('Navigation and App Tests', () => {
     // Check that version is displayed
     cy.get('[data-cy="app-version"]')
       .should('be.visible')
-      .should('contain', 'v1.0.0');
+      .should('contain', 'v1.0.2');
 
     // Check that debug status is displayed
     cy.get('[data-cy="debug-status"]')

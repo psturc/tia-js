@@ -244,6 +244,10 @@ export interface TestCoverageData {
     status?: 'passed' | 'failed' | 'skipped';
     /** Coverage percentage */
     coveragePercentage?: number;
+    /** Individual test name (for per-test granularity) */
+    testName?: string;
+    /** Spec file path (for per-test granularity) */
+    specFile?: string;
   };
 }
 

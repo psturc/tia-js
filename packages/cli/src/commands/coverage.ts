@@ -7,10 +7,16 @@ import chalk from 'chalk';
 import ora from 'ora';
 import { TIAEngine } from '@tia-js/core';
 import { loadConfig } from '../config';
+import { coverageAnalysisCommand } from './coverage-analysis';
+import { collectCoverageCommand } from './collect-coverage';
+import { importCoverageCommand } from './import-coverage';
 
 export const coverageCommand = new Command('coverage')
   .alias('cov')
-  .description('Manage test coverage data for TIA');
+  .description('Manage test coverage data for TIA')
+  .addCommand(collectCoverageCommand)
+  .addCommand(importCoverageCommand)
+  .addCommand(coverageAnalysisCommand);
 
 // Stats subcommand
 coverageCommand
@@ -77,18 +83,40 @@ coverageCommand
       const coveredFiles = await nycReader.readNYCCoverage();
       const stats = await nycReader.getCoverageStats();
       
-      // Use enhanced per-test coverage mapping
-      const perTestAnalyzer = engine['perTestCoverageAnalyzer'];
-      const mapping = await perTestAnalyzer.getPerTestCoverageMapping();
+      // Check if we have TIA per-test coverage data first
+      const coverageStats = await engine.getCoverageStats();
+      let sourceToTestMapping = new Map<string, string[]>();
       
-      // Convert to the format expected by display functions (source -> tests)
-      const sourceToTestMapping = new Map<string, string[]>();
-      for (const [testFile, sourceFiles] of mapping) {
-        for (const sourceFile of sourceFiles) {
-          if (!sourceToTestMapping.has(sourceFile)) {
-            sourceToTestMapping.set(sourceFile, []);
+      if (coverageStats.totalTests > 0) {
+        // Use precise TIA per-test coverage data
+        const coverageAnalyzer = engine['coverageAnalyzer'];
+        const coverageMap = await coverageAnalyzer['coverageStorage'].loadCoverageMap();
+        
+        console.log(chalk.blue('Using precise per-test coverage data from TIA storage'));
+        
+        // Convert TIA storage format to source -> tests mapping
+        for (const [testFile, testData] of coverageMap.tests) {
+          for (const sourceFile of testData.executedFiles) {
+            if (!sourceToTestMapping.has(sourceFile)) {
+              sourceToTestMapping.set(sourceFile, []);
+            }
+            sourceToTestMapping.get(sourceFile)!.push(testFile);
           }
-          sourceToTestMapping.get(sourceFile)!.push(testFile);
+        }
+      } else {
+        // Fallback to NYC-based enhanced mapping
+        console.log(chalk.yellow('No TIA per-test data found, using NYC-based mapping'));
+        const perTestAnalyzer = engine['perTestCoverageAnalyzer'];
+        const mapping = await perTestAnalyzer.getPerTestCoverageMapping();
+        
+        // Convert to the format expected by display functions (source -> tests)
+        for (const [testFile, sourceFiles] of mapping) {
+          for (const sourceFile of sourceFiles) {
+            if (!sourceToTestMapping.has(sourceFile)) {
+              sourceToTestMapping.set(sourceFile, []);
+            }
+            sourceToTestMapping.get(sourceFile)!.push(testFile);
+          }
         }
       }
       
@@ -203,9 +231,30 @@ function displayMappingTable(mapping: Map<string, string[]>, stats: any): void {
   }
   
   console.log(chalk.bold('Coverage Statistics:'));
-  console.log(`  Statements: ${chalk.yellow(typeof stats.statements === 'object' ? JSON.stringify(stats.statements) : stats.statements)}`);
-  console.log(`  Functions: ${chalk.yellow(typeof stats.functions === 'object' ? JSON.stringify(stats.functions) : stats.functions)}`);
-  console.log(`  Branches: ${chalk.yellow(typeof stats.branches === 'object' ? JSON.stringify(stats.branches) : stats.branches)}`);
+  
+  // Format statements
+  if (stats.statements && typeof stats.statements === 'object') {
+    const s = stats.statements;
+    console.log(`  Statements: ${chalk.yellow(`${s.covered}/${s.total}`)} (${chalk.cyan(`${s.percentage.toFixed(1)}%`)})`);
+  } else {
+    console.log(`  Statements: ${chalk.yellow(stats.statements || 'N/A')}`);
+  }
+  
+  // Format functions
+  if (stats.functions && typeof stats.functions === 'object') {
+    const f = stats.functions;
+    console.log(`  Functions: ${chalk.yellow(`${f.covered}/${f.total}`)} (${chalk.cyan(`${f.percentage.toFixed(1)}%`)})`);
+  } else {
+    console.log(`  Functions: ${chalk.yellow(stats.functions || 'N/A')}`);
+  }
+  
+  // Format branches
+  if (stats.branches && typeof stats.branches === 'object') {
+    const b = stats.branches;
+    console.log(`  Branches: ${chalk.yellow(`${b.covered}/${b.total}`)} (${chalk.cyan(`${b.percentage.toFixed(1)}%`)})`);
+  } else {
+    console.log(`  Branches: ${chalk.yellow(stats.branches || 'N/A')}`);
+  }
 }
 
 function displayMappingSummary(mapping: Map<string, string[]>, stats: any, coveredFiles: string[]): void {
@@ -217,7 +266,14 @@ function displayMappingSummary(mapping: Map<string, string[]>, stats: any, cover
   
   console.log(`Total covered files: ${chalk.yellow(coveredFiles.length)}`);
   console.log(`Total test files: ${chalk.yellow(uniqueTests.size)}`);
-  console.log(`Coverage: ${chalk.green(stats.statements)} statements`);
+  
+  // Format coverage statistics properly
+  if (stats.statements && typeof stats.statements === 'object') {
+    const stmtStats = stats.statements;
+    console.log(`Coverage: ${chalk.green(`${stmtStats.covered}/${stmtStats.total}`)} statements (${chalk.cyan(`${stmtStats.percentage.toFixed(1)}%`)})`);
+  } else {
+    console.log(`Coverage: ${chalk.gray('No statement coverage data')}`);
+  }
   
   console.log();
   console.log(chalk.bold('Files by Test Count:'));

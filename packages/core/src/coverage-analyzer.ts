@@ -209,12 +209,28 @@ export class CoverageAnalyzer {
           this.logger.debug(`Found ${coveringTests.length} tests covering ${relativeChangedFile}`);
           
           for (const testData of coveringTests) {
-            const testFile: TestFile = {
-              path: testData.testFile,
-              reason: 'coverage-direct',
-              priority: this.calculatePriority(testData, normalizedChangedFile)
-            };
-            affectedTestsMap.set(testData.testFile, testFile);
+            // Check if we have per-test granularity (contains ::)
+            if (testData.testFile.includes('::')) {
+              // Keep the full per-test identifier for granular analysis
+              const testFile: TestFile = {
+                path: testData.testFile, // Keep the full "file::testname" format
+                reason: 'coverage-direct',
+                priority: this.calculatePriority(testData, normalizedChangedFile),
+                metadata: {
+                  testName: testData.metadata?.testName,
+                  specFile: testData.metadata?.specFile || testData.testFile.split('::')[0]
+                }
+              };
+              affectedTestsMap.set(testData.testFile, testFile);
+            } else {
+              // Legacy format - just the file path
+              const testFile: TestFile = {
+                path: testData.testFile,
+                reason: 'coverage-direct',
+                priority: this.calculatePriority(testData, normalizedChangedFile)
+              };
+              affectedTestsMap.set(testData.testFile, testFile);
+            }
           }
         } else {
           this.logger.debug(`No coverage data found for ${relativeChangedFile}`);
