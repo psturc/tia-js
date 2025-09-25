@@ -18,7 +18,7 @@ class AppManager {
     displayVersion() {
         const versionElement = document.getElementById('app-version');
         if (versionElement) {
-            versionElement.textContent = `v${getVersion()}`;
+            versionElement.textContent = `v${getVersion()}`; // Enhanced TIA test
         }
     }
 
