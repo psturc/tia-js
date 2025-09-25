@@ -17,27 +17,8 @@ export default defineConfig({
         console.warn('[Coverage] Code coverage plugin failed to load:', error.message);
       }
       
-      // TIA coverage data collection
-      on('task', {
-        'tia:storeCoverage': async ({ testFile, executedFiles, metadata }) => {
-          try {
-            const { TIAEngine } = require('@tia-js/core');
-            
-            // Load TIA config
-            const tiaConfig = require('../../tia.config.cjs');
-            const engine = new TIAEngine(tiaConfig);
-            
-            // Store coverage data
-            await engine.storeCoverageData(testFile, executedFiles, 'cypress', metadata);
-            console.log(`[TIA] Stored coverage for ${testFile} (${executedFiles.length} files)`);
-            
-            return null;
-          } catch (error) {
-            console.error('[TIA] Failed to store coverage:', error.message);
-            return null;
-          }
-        }
-      });
+      // Note: TIA now reads coverage data directly from .nyc_output/out.json
+      // No custom tasks needed - @cypress/code-coverage handles everything
 
       return config;
     },

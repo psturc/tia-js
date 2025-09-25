@@ -30,7 +30,7 @@ class Calculator {
         const operation = document.getElementById('operation').value;
         const resultElement = document.getElementById('result');
 
-        // Validation
+        // Enhanced TIA validation test
         if (!isValidNumber(num1) || !isValidNumber(num2)) {
             resultElement.textContent = 'Please enter valid numbers';
             resultElement.style.color = 'red';
