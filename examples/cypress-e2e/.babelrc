@@ -1,0 +1,11 @@
+{
+  "plugins": [
+    ["istanbul", {
+      "exclude": [
+        "**/*.cy.js",
+        "**/cypress/**",
+        "**/node_modules/**"
+      ]
+    }]
+  ]
+}
