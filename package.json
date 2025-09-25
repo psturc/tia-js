@@ -1,5 +1,5 @@
 {
-  "name": "@tia-js/monorepo",
+  "name": "@tia-js",
   "version": "1.0.0",
   "description": "Test Impact Analysis ecosystem for multiple testing frameworks",
   "private": true,
