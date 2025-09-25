@@ -181,6 +181,7 @@ export class TIAEngine {
 
     for (const changedFile of changedFiles) {
       const filePath = changedFile.path;
+      console.debug(`[DEBUG] Processing changed file: ${filePath}`);
 
       // If the changed file is a test file itself
       if (isTestFile(filePath)) {
@@ -193,11 +194,14 @@ export class TIAEngine {
         filePath, 
         this.config.maxDepth || 10
       );
+      console.debug(`[DEBUG] Dependents of ${filePath}:`, dependents);
 
       // Add test files that depend on the changed file
       for (const dependent of dependents) {
+        console.debug(`[DEBUG] Checking dependent: ${dependent}, isTest: ${isTestFile(dependent)}`);
         if (isTestFile(dependent)) {
           testFiles.add(dependent);
+          console.debug(`[DEBUG] Added test file: ${dependent}`);
         }
       }
 

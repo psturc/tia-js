@@ -128,8 +128,10 @@ export class ChangeDetector {
           changeType = 'modified';
       }
 
+      // Ensure the path is resolved relative to the correct root
+      const resolvedPath = path.isAbsolute(filePath) ? filePath : path.resolve(this.rootDir, filePath);
       changes.push({
-        path: path.resolve(this.rootDir, filePath),
+        path: resolvedPath,
         changeType,
         previousPath
       });

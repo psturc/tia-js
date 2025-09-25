@@ -3,7 +3,6 @@
  */
 
 export function add(a: number, b: number): number {
-  // Simple addition function with validation
   if (typeof a !== 'number' || typeof b !== 'number') {
     throw new Error('Arguments must be numbers');
   }

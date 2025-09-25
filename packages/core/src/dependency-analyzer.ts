@@ -56,6 +56,10 @@ export class DependencyAnalyzer {
       const node = this.graph.get(normalizedPath);
       if (node) {
         node.dependencies = dependencies;
+        // Debug logging
+        if (dependencies.length > 0) {
+          console.debug(`[DEBUG] ${normalizedPath} depends on:`, dependencies);
+        }
       }
     } catch (error) {
       // Skip files that can't be read
@@ -87,7 +91,9 @@ export class DependencyAnalyzer {
       let match;
       while ((match = pattern.exec(content)) !== null) {
         const importPath = match[1];
+        console.debug(`[DEBUG] Found import "${importPath}" in ${filePath}`);
         const resolvedPath = this.resolveImport(importPath, filePath);
+        console.debug(`[DEBUG] Resolved to: ${resolvedPath}`);
         if (resolvedPath) {
           dependencies.add(resolvedPath);
         }
