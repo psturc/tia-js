@@ -2,10 +2,12 @@
  * Application initialization and UI setup
  */
 import { APP_CONFIG, getVersion } from './config.js';
+import { NavigationManager } from './navigation-manager.js';
 
 class AppManager {
     constructor() {
         this.config = APP_CONFIG;
+        this.navigationManager = new NavigationManager();
         this.init();
     }
 

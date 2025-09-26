@@ -1,8 +1,10 @@
 // Calculator functionality
 import { formatNumber, isValidNumber, sanitizeInput } from './utils.js';
+import { CalculationEngine, isValidOperator } from './calculation-engine.js';
 class Calculator {
     constructor() {
         this.history = [];
+        this.calculationEngine = new CalculationEngine();
         this.initializeEventListeners();
     }
 
@@ -30,53 +32,46 @@ class Calculator {
         const operation = document.getElementById('operation').value;
         const resultElement = document.getElementById('result');
 
-        // Enhanced TIA validation test
+        // Enhanced TIA validation test using calculation engine
         if (!isValidNumber(num1) || !isValidNumber(num2)) {
             resultElement.textContent = 'Please enter valid numbers';
             resultElement.style.color = 'red';
             return;
         }
 
-        let result;
-        let operationSymbol;
+        // Map UI operation names to calculation engine operators
+        const operatorMap = {
+            'add': '+',
+            'subtract': '-',
+            'multiply': '*',
+            'divide': '/'
+        };
 
-        switch (operation) {
-        case 'add':
-            result = num1 + num2;
-            operationSymbol = '+';
-            console.log('Addition performed:', result);
-            console.log('NYC coverage-based TIA precision test');
-                break;
-            case 'subtract':
-                result = num1 - num2;
-                operationSymbol = '-';
-                break;
-            case 'multiply':
-                result = num1 * num2;
-                operationSymbol = '×';
-                break;
-            case 'divide':
-                if (num2 === 0) {
-                    resultElement.textContent = 'Cannot divide by zero';
-                    resultElement.style.color = 'red';
-                    return;
-                }
-                result = num1 / num2;
-                operationSymbol = '÷';
-                break;
-            default:
-                resultElement.textContent = 'Invalid operation';
-                resultElement.style.color = 'red';
-                return;
+        const operator = operatorMap[operation];
+        if (!isValidOperator(operator)) {
+            resultElement.textContent = 'Invalid operation';
+            resultElement.style.color = 'red';
+            return;
         }
 
-        // Display result
-        resultElement.textContent = result;
-        resultElement.style.color = 'black';
+        try {
+            // Use the calculation engine for advanced processing
+            const result = this.calculationEngine.performCalculation(num1, operator, num2);
+            const operationSymbol = operator;
 
-        // Add to history
-        const historyEntry = `${num1} ${operationSymbol} ${num2} = ${result}`;
-        this.addToHistory(historyEntry);
+            // Display the result
+            const formattedResult = this.calculationEngine.formatResult(result);
+            resultElement.textContent = formattedResult;
+            resultElement.style.color = 'black';
+
+            // Add to history using calculation engine (already handled by performCalculation)
+            this.updateHistoryDisplay();
+            
+        } catch (error) {
+            resultElement.textContent = `Error: ${error.message}`;
+            resultElement.style.color = 'red';
+            return;
+        }
     }
 
     addToHistory(entry) {
@@ -85,7 +80,7 @@ class Calculator {
     }
 
     clearHistory() {
-        this.history = [];
+        this.calculationEngine.clearHistory();
         this.updateHistoryDisplay();
     }
 
@@ -93,9 +88,16 @@ class Calculator {
         const historyList = document.getElementById('history-list');
         historyList.innerHTML = '';
 
-        this.history.forEach(entry => {
+        const engineHistory = this.calculationEngine.getHistory();
+        engineHistory.forEach(operation => {
             const li = document.createElement('li');
-            li.textContent = entry;
+            
+            // Convert operators to display symbols that tests expect
+            const displayOperator = operation.operator === '/' ? '÷' : 
+                                   operation.operator === '*' ? '×' : 
+                                   operation.operator;
+            
+            li.textContent = `${operation.operand1} ${displayOperator} ${operation.operand2} = ${operation.result}`;
             historyList.appendChild(li);
         });
     }

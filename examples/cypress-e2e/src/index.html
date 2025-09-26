@@ -8,7 +8,17 @@
 </head>
 <body>
     <div class="container">
-        <h1>Calculator App</h1>
+        <!-- Navigation section - will be tested by navigation tests -->
+        <nav class="app-navigation">
+            <div id="breadcrumbs" data-cy="breadcrumbs"></div>
+            <div class="nav-info">
+                <span id="app-version" data-cy="app-version"></span>
+                <span id="debug-status" data-cy="debug-status"></span>
+            </div>
+        </nav>
+        
+        <h1 id="page-title" data-cy="page-title">Calculator App</h1>
+        <p id="page-description" data-cy="page-description">Perform basic mathematical calculations</p>
         
         <div class="calculator">
             <input type="number" id="num1" placeholder="First number" data-cy="num1">

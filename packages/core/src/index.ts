@@ -10,6 +10,7 @@ export { CoverageStorage } from './coverage-storage';
 export { NYCCoverageReader } from './nyc-coverage-reader';
 export { PerTestCoverageAnalyzer } from './per-test-coverage-analyzer';
 export { PerTestRunner } from './per-test-runner';
+export { LineLevelAnalyzer } from './line-level-analyzer';
 
 // Re-export common types for convenience
 export * from '@tia-js/common';

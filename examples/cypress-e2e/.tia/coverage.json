@@ -1,0 +1,287 @@
+{
+  "tests": {
+    "cypress/e2e/calculator.cy.js::Calculator App should add calculations to history": {
+      "testFile": "cypress/e2e/calculator.cy.js::Calculator App should add calculations to history",
+      "executedFiles": [
+        "src/config.js",
+        "src/navigation-manager.js",
+        "src/app.js",
+        "src/utils.js",
+        "src/calculation-engine.js",
+        "src/calculator.js"
+      ],
+      "timestamp": 1758871267886,
+      "framework": "cypress",
+      "metadata": {
+        "status": "passed",
+        "testName": "Calculator App should add calculations to history",
+        "specFile": "cypress/e2e/calculator.cy.js"
+      }
+    },
+    "cypress/e2e/calculator.cy.js::Calculator App should calculate using Enter key": {
+      "testFile": "cypress/e2e/calculator.cy.js::Calculator App should calculate using Enter key",
+      "executedFiles": [
+        "src/config.js",
+        "src/navigation-manager.js",
+        "src/app.js",
+        "src/utils.js",
+        "src/calculation-engine.js",
+        "src/calculator.js"
+      ],
+      "timestamp": 1758871267888,
+      "framework": "cypress",
+      "metadata": {
+        "status": "passed",
+        "testName": "Calculator App should calculate using Enter key",
+        "specFile": "cypress/e2e/calculator.cy.js"
+      }
+    },
+    "cypress/e2e/calculator.cy.js::Calculator App should clear history": {
+      "testFile": "cypress/e2e/calculator.cy.js::Calculator App should clear history",
+      "executedFiles": [
+        "src/config.js",
+        "src/navigation-manager.js",
+        "src/app.js",
+        "src/utils.js",
+        "src/calculation-engine.js",
+        "src/calculator.js"
+      ],
+      "timestamp": 1758871267889,
+      "framework": "cypress",
+      "metadata": {
+        "status": "passed",
+        "testName": "Calculator App should clear history",
+        "specFile": "cypress/e2e/calculator.cy.js"
+      }
+    },
+    "cypress/e2e/calculator.cy.js::Calculator App should handle division by zero": {
+      "testFile": "cypress/e2e/calculator.cy.js::Calculator App should handle division by zero",
+      "executedFiles": [
+        "src/config.js",
+        "src/navigation-manager.js",
+        "src/app.js",
+        "src/utils.js",
+        "src/calculation-engine.js",
+        "src/calculator.js"
+      ],
+      "timestamp": 1758871267890,
+      "framework": "cypress",
+      "metadata": {
+        "status": "passed",
+        "testName": "Calculator App should handle division by zero",
+        "specFile": "cypress/e2e/calculator.cy.js"
+      }
+    },
+    "cypress/e2e/calculator.cy.js::Calculator App should load the calculator page": {
+      "testFile": "cypress/e2e/calculator.cy.js::Calculator App should load the calculator page",
+      "executedFiles": [
+        "src/config.js",
+        "src/navigation-manager.js",
+        "src/app.js",
+        "src/calculation-engine.js",
+        "src/calculator.js"
+      ],
+      "timestamp": 1758871267891,
+      "framework": "cypress",
+      "metadata": {
+        "status": "passed",
+        "testName": "Calculator App should load the calculator page",
+        "specFile": "cypress/e2e/calculator.cy.js"
+      }
+    },
+    "cypress/e2e/calculator.cy.js::Calculator App should perform basic addition": {
+      "testFile": "cypress/e2e/calculator.cy.js::Calculator App should perform basic addition",
+      "executedFiles": [
+        "src/config.js",
+        "src/navigation-manager.js",
+        "src/app.js",
+        "src/utils.js",
+        "src/calculation-engine.js",
+        "src/calculator.js"
+      ],
+      "timestamp": 1758871267893,
+      "framework": "cypress",
+      "metadata": {
+        "status": "passed",
+        "testName": "Calculator App should perform basic addition",
+        "specFile": "cypress/e2e/calculator.cy.js"
+      }
+    },
+    "cypress/e2e/calculator.cy.js::Calculator App should perform basic division": {
+      "testFile": "cypress/e2e/calculator.cy.js::Calculator App should perform basic division",
+      "executedFiles": [
+        "src/config.js",
+        "src/navigation-manager.js",
+        "src/app.js",
+        "src/utils.js",
+        "src/calculation-engine.js",
+        "src/calculator.js"
+      ],
+      "timestamp": 1758871267894,
+      "framework": "cypress",
+      "metadata": {
+        "status": "passed",
+        "testName": "Calculator App should perform basic division",
+        "specFile": "cypress/e2e/calculator.cy.js"
+      }
+    },
+    "cypress/e2e/calculator.cy.js::Calculator App should perform basic multiplication": {
+      "testFile": "cypress/e2e/calculator.cy.js::Calculator App should perform basic multiplication",
+      "executedFiles": [
+        "src/config.js",
+        "src/navigation-manager.js",
+        "src/app.js",
+        "src/utils.js",
+        "src/calculation-engine.js",
+        "src/calculator.js"
+      ],
+      "timestamp": 1758871267895,
+      "framework": "cypress",
+      "metadata": {
+        "status": "passed",
+        "testName": "Calculator App should perform basic multiplication",
+        "specFile": "cypress/e2e/calculator.cy.js"
+      }
+    },
+    "cypress/e2e/calculator.cy.js::Calculator App should perform basic subtraction": {
+      "testFile": "cypress/e2e/calculator.cy.js::Calculator App should perform basic subtraction",
+      "executedFiles": [
+        "src/config.js",
+        "src/navigation-manager.js",
+        "src/app.js",
+        "src/utils.js",
+        "src/calculation-engine.js",
+        "src/calculator.js"
+      ],
+      "timestamp": 1758871267896,
+      "framework": "cypress",
+      "metadata": {
+        "status": "passed",
+        "testName": "Calculator App should perform basic subtraction",
+        "specFile": "cypress/e2e/calculator.cy.js"
+      }
+    },
+    "cypress/e2e/calculator.cy.js::Calculator App should validate input fields": {
+      "testFile": "cypress/e2e/calculator.cy.js::Calculator App should validate input fields",
+      "executedFiles": [
+        "src/config.js",
+        "src/navigation-manager.js",
+        "src/app.js",
+        "src/utils.js",
+        "src/calculation-engine.js",
+        "src/calculator.js"
+      ],
+      "timestamp": 1758871267897,
+      "framework": "cypress",
+      "metadata": {
+        "status": "passed",
+        "testName": "Calculator App should validate input fields",
+        "specFile": "cypress/e2e/calculator.cy.js"
+      }
+    },
+    "cypress/e2e/navigation.cy.js::Navigation and App Tests should display app version and status": {
+      "testFile": "cypress/e2e/navigation.cy.js::Navigation and App Tests should display app version and status",
+      "executedFiles": [
+        "src/config.js",
+        "src/navigation-manager.js",
+        "src/app.js",
+        "src/calculation-engine.js",
+        "src/calculator.js"
+      ],
+      "timestamp": 1758871267898,
+      "framework": "cypress",
+      "metadata": {
+        "status": "passed",
+        "testName": "Navigation and App Tests should display app version and status",
+        "specFile": "cypress/e2e/navigation.cy.js"
+      }
+    },
+    "cypress/e2e/navigation.cy.js::Navigation and App Tests should display the calculator form": {
+      "testFile": "cypress/e2e/navigation.cy.js::Navigation and App Tests should display the calculator form",
+      "executedFiles": [
+        "src/config.js",
+        "src/navigation-manager.js",
+        "src/app.js",
+        "src/calculation-engine.js",
+        "src/calculator.js"
+      ],
+      "timestamp": 1758871267899,
+      "framework": "cypress",
+      "metadata": {
+        "status": "passed",
+        "testName": "Navigation and App Tests should display the calculator form",
+        "specFile": "cypress/e2e/navigation.cy.js"
+      }
+    },
+    "cypress/e2e/navigation.cy.js::Navigation and App Tests should have proper page title": {
+      "testFile": "cypress/e2e/navigation.cy.js::Navigation and App Tests should have proper page title",
+      "executedFiles": [
+        "src/config.js",
+        "src/navigation-manager.js",
+        "src/app.js",
+        "src/calculation-engine.js",
+        "src/calculator.js"
+      ],
+      "timestamp": 1758871267900,
+      "framework": "cypress",
+      "metadata": {
+        "status": "passed",
+        "testName": "Navigation and App Tests should have proper page title",
+        "specFile": "cypress/e2e/navigation.cy.js"
+      }
+    },
+    "cypress/e2e/navigation.cy.js::Navigation and App Tests should have valid API URL from config": {
+      "testFile": "cypress/e2e/navigation.cy.js::Navigation and App Tests should have valid API URL from config",
+      "executedFiles": [
+        "src/config.js",
+        "src/navigation-manager.js",
+        "src/app.js",
+        "src/calculation-engine.js",
+        "src/calculator.js"
+      ],
+      "timestamp": 1758871267901,
+      "framework": "cypress",
+      "metadata": {
+        "status": "passed",
+        "testName": "Navigation and App Tests should have valid API URL from config",
+        "specFile": "cypress/e2e/navigation.cy.js"
+      }
+    },
+    "cypress/e2e/navigation.cy.js::Navigation and App Tests should load the main page": {
+      "testFile": "cypress/e2e/navigation.cy.js::Navigation and App Tests should load the main page",
+      "executedFiles": [
+        "src/config.js",
+        "src/navigation-manager.js",
+        "src/app.js",
+        "src/calculation-engine.js",
+        "src/calculator.js"
+      ],
+      "timestamp": 1758871267903,
+      "framework": "cypress",
+      "metadata": {
+        "status": "passed",
+        "testName": "Navigation and App Tests should load the main page",
+        "specFile": "cypress/e2e/navigation.cy.js"
+      }
+    },
+    "cypress/e2e/navigation.cy.js::Navigation and App Tests should toggle debug mode via app manager": {
+      "testFile": "cypress/e2e/navigation.cy.js::Navigation and App Tests should toggle debug mode via app manager",
+      "executedFiles": [
+        "src/config.js",
+        "src/navigation-manager.js",
+        "src/app.js",
+        "src/calculation-engine.js",
+        "src/calculator.js"
+      ],
+      "timestamp": 1758871267904,
+      "framework": "cypress",
+      "metadata": {
+        "status": "passed",
+        "testName": "Navigation and App Tests should toggle debug mode via app manager",
+        "specFile": "cypress/e2e/navigation.cy.js"
+      }
+    }
+  },
+  "lastUpdated": 1758871267904,
+  "rootDir": "/Users/psturc/dev/tia-js/examples/cypress-e2e"
+}

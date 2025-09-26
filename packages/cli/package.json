@@ -33,12 +33,13 @@
     "@tia-js/common": "^1.0.0",
     "@tia-js/core": "^1.0.0",
     "@tia-js/cypress": "^1.0.0",
-    "@tia-js/playwright": "^1.0.0",
     "@tia-js/jest": "^1.0.0",
-    "commander": "^11.0.0",
+    "@tia-js/playwright": "^1.0.0",
     "chalk": "^4.1.2",
-    "ora": "^5.4.1",
-    "inquirer": "^8.2.6"
+    "cli-table3": "^0.6.5",
+    "commander": "^11.0.0",
+    "inquirer": "^8.2.6",
+    "ora": "^5.4.1"
   },
   "devDependencies": {
     "@types/inquirer": "^9.0.0",
