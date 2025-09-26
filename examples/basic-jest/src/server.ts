@@ -18,8 +18,9 @@ const orderService = new OrderService();
  * Health check endpoint - covered by health tests
  */
 app.get('/health', (req, res) => {
+  
   res.json({ 
-    status: 'healthy',
+    status: 'operational',
     timestamp: new Date().toISOString(),
     uptime: process.uptime()
   });

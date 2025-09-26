@@ -63,6 +63,18 @@ describe('User Management', () => {
     });
   });
 
+  describe('Health Check', () => {
+    it('should return health status', async () => {
+      const response = await request(app)
+        .get('/health')
+        .expect(200);
+
+      expect(response.body).toHaveProperty('status', 'healthy');
+      expect(response.body).toHaveProperty('timestamp');
+      expect(response.body).toHaveProperty('uptime');
+    });
+  });
+
   describe('User API Endpoints', () => {
     it('should create user via POST /users', async () => {
       const userData = {
