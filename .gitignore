@@ -12,6 +12,7 @@ build/
 # Coverage reports
 coverage/
 .nyc_output/
+.tia/
 
 # Runtime data
 pids/
@@ -63,5 +64,3 @@ lerna-debug.log
 # Package lock files (using npm workspaces)
 package-lock.json
 yarn.lock
-
-.tia/
