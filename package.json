@@ -1,6 +1,6 @@
 {
   "name": "tia-js",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "Streamlined Test Impact Analysis for PR workflows - Line-level precision for test optimization",
   "private": true,
   "workspaces": [
@@ -29,7 +29,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/your-org/tia-js.git"
+    "url": "https://github.com/psturc/tia-js.git"
   },
   "author": "Your Name",
   "license": "MIT"

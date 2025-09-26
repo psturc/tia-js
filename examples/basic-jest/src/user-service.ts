@@ -28,7 +28,7 @@ export class UserService {
   async createUser(userData: { name: string; email: string }): Promise<User> {
     // Validate user data with enhanced logging
     if (!userData.name || !userData.email) {
-      throw new Error('Name and email are required for user creation');
+      throw new Error('Name and email are required');
     }
 
     if (!this.isValidEmail(userData.email)) {
@@ -42,7 +42,7 @@ export class UserService {
       createdAt: new Date().toISOString()
     };
 
-    this.users.set(user.id, user);
+    this.users.set(user.id, user); // Store validated user record
     console.log(`Created user: ${user.name} (${user.email})`);
     
     return user;
