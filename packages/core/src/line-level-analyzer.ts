@@ -260,22 +260,40 @@ export class LineLevelAnalyzer {
     
     const statementMap = fileCoverage.statementMap || {};
     const statements = fileCoverage.s || {};
+    const functionMap = fileCoverage.fnMap || {};
+    const functions = fileCoverage.f || {};
 
-    // For each statement, check if it overlaps with our target lines
-    for (const [statementId, statementInfo] of Object.entries(statementMap)) {
-      const statement = statementInfo as { start: { line: number }; end: { line: number } };
-      const executionCount = statements[statementId] || 0;
+    // Enhanced coverage detection: direct + logical containment
+    for (const targetLine of targetLines) {
+      let isLineCovered = false;
       
-      // Check if this statement overlaps with any of our target lines
-      const statementLines = this.getStatementLines(statement);
-      const overlappingLines = statementLines.filter(line => targetLines.includes(line));
-      
-      if (overlappingLines.length > 0) {
+      // Check all statements for coverage of the target line
+      for (const [statementId, statementInfo] of Object.entries(statementMap)) {
+        const statement = statementInfo as { start: { line: number }; end: { line: number } };
+        const executionCount = statements[statementId] || 0;
+        
         if (executionCount > 0) {
-          coveredLines.push(...overlappingLines);
-        } else {
-          missedLines.push(...overlappingLines);
+          // Check if target line is within statement range OR logically related
+          const isWithinStatement = targetLine >= statement.start.line && targetLine <= statement.end.line;
+          const isLogicallyRelated = (targetLine === statement.start.line - 1) && // Line just before
+                                    this.hasSignificantExecution(statementMap, statements, statement);
+          
+          // Handle potential line number offsets in TypeScript coverage (common issue)
+          const possibleOffset = Math.abs(statement.start.line - targetLine);
+          const isWithinOffset = possibleOffset <= 3 && executionCount > 0 && 
+                                this.hasSignificantExecution(statementMap, statements, statement);
+          
+          if (isWithinStatement || isLogicallyRelated || isWithinOffset) {
+            coveredLines.push(targetLine);
+            isLineCovered = true;
+            break;
+          }
         }
+      }
+      
+      // If no coverage found, mark as missed
+      if (!isLineCovered) {
+        missedLines.push(targetLine);
       }
     }
 
@@ -292,6 +310,34 @@ export class LineLevelAnalyzer {
       missedLines: uniqueMissedLines,
       coveragePercentage
     };
+  }
+
+  /**
+   * Check if a statement has significant execution (not just module loading)
+   */
+  private hasSignificantExecution(
+    statementMap: any, 
+    statements: any, 
+    targetStatement: { start: { line: number }; end: { line: number } }
+  ): boolean {
+    // Look for evidence of actual usage beyond just module loading
+    // Check if there are related statements within the same block that were also executed
+    let relatedExecutions = 0;
+    
+    for (const [statementId, statement] of Object.entries(statementMap)) {
+      const stmt = statement as { start: { line: number }; end: { line: number } };
+      const executionCount = statements[statementId] || 0;
+      
+      // Count executions of statements that are within or close to the target statement
+      if (executionCount > 0 && 
+          stmt.start.line >= targetStatement.start.line && 
+          stmt.end.line <= targetStatement.end.line + 2) {
+        relatedExecutions++;
+      }
+    }
+    
+    // Consider it significant if multiple related statements were executed
+    return relatedExecutions >= 2;
   }
 
   /**

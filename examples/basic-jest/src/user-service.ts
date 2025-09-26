@@ -17,7 +17,7 @@ export class UserService {
   async getUserById(id: number): Promise<User> {
     console.log(`Fetching user with ID: ${id}`); // Enhanced user lookup
     
-    const user = this.users.get(id);
+    const user = this.users.get(id); // Retrieve user by ID
     if (!user) {
       throw new Error(`User with ID ${id} not found`);
     }
