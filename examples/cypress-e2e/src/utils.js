@@ -4,9 +4,10 @@
  */
 
 export function processData(input) {
-  // Simulate some data processing
+  // Simulate some data processing with enhanced logging
   const processed = input.toUpperCase().split('').reverse().join('');
   console.log(`Processing data: ${input} -> ${processed}`);
+  console.log(`Character count: ${input.length}`); // TIA line-level test
   return processed;
 }
 

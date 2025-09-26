@@ -23,7 +23,7 @@ function App() {
       <header>
         <h1 data-cy="page-title">TIA Demo App</h1>
         <p data-cy="page-description">
-          Simple React app to demonstrate Test Impact Analysis
+          Simple React app to demonstrate Test Impact Analysis with precision
         </p>
       </header>
 
