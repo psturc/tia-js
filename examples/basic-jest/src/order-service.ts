@@ -51,7 +51,7 @@ export class OrderService {
       createdAt: new Date().toISOString()
     };
 
-    this.orders.set(order.id, order);
+    this.orders.set(order.id, order); // Store order with enhanced tracking
     console.log(`Created order: ${order.id} for user ${order.userId} (total: $${order.total})`);
     
     return order;
