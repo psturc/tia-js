@@ -147,7 +147,7 @@ export const importCoverageCommand = new Command('import')
  */
 function isSourceFile(filePath: string): boolean {
   return filePath.includes('/src/') && 
-         filePath.endsWith('.js') &&
+         (filePath.endsWith('.js') || filePath.endsWith('.jsx') || filePath.endsWith('.ts') || filePath.endsWith('.tsx')) &&
          !filePath.includes('node_modules') &&
          !filePath.includes('/test/') &&
          !filePath.includes('.test.') &&

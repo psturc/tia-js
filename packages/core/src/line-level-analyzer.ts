@@ -198,15 +198,22 @@ export class LineLevelAnalyzer {
   private findFileCoverageInData(coverageData: any, targetFile: string): any {
     const normalizedTargetFile = path.resolve(this.rootDir, targetFile);
     
+    this.logger.debug(`Looking for coverage of: ${targetFile}`);
+    this.logger.debug(`Normalized target: ${normalizedTargetFile}`);
+    
     // Look for the file in coverage data (could be absolute or relative path)
     for (const [filePath, coverage] of Object.entries(coverageData)) {
-      const normalizedFilePath = path.resolve(this.rootDir, filePath);
+      const normalizedFilePath = path.resolve(filePath);
+      
+      this.logger.debug(`Checking coverage file: ${filePath} -> ${normalizedFilePath}`);
       
       if (normalizedFilePath === normalizedTargetFile) {
+        this.logger.debug(`✅ Found coverage match for ${targetFile}`);
         return coverage;
       }
     }
     
+    this.logger.debug(`❌ No coverage found for ${targetFile}`);
     return null;
   }
 

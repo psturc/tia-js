@@ -26,7 +26,10 @@ export const lineAnalysisCommand = new Command('line-analysis')
       const config = await loadConfig(options.config);
       const { createLogger } = require('@tia-js/common');
       const logger = createLogger('info');
-      const analyzer = new LineLevelAnalyzer(config.rootDir, logger);
+      
+      // Use current working directory for line analysis instead of config.rootDir
+      const workingDir = process.cwd();
+      const analyzer = new LineLevelAnalyzer(workingDir, logger);
       
       // Determine which files to analyze
       let changedFiles: string[];
@@ -37,11 +40,23 @@ export const lineAnalysisCommand = new Command('line-analysis')
         // Get changed files from git
         const { execSync } = require('child_process');
         try {
-          const gitOutput = execSync('git diff --name-only HEAD', { 
-            cwd: config.rootDir, 
-            encoding: 'utf-8' 
-          });
-          changedFiles = gitOutput.trim().split('\n').filter((f: string) => f.length > 0);
+        const gitOutput = execSync('git diff --name-only HEAD', { 
+          cwd: workingDir, 
+          encoding: 'utf-8' 
+        });
+          changedFiles = gitOutput.trim().split('\n')
+            .filter((f: string) => f.length > 0)
+            .map((f: string) => {
+              // Convert git repo-relative paths to working directory-relative paths
+              const path = require('path');
+              const repoRoot = execSync('git rev-parse --show-toplevel', { 
+                cwd: workingDir, 
+                encoding: 'utf-8' 
+              }).trim();
+              const absolutePath = path.resolve(repoRoot, f);
+              return path.relative(workingDir, absolutePath);
+            })
+            .filter((f: string) => !f.startsWith('../')); // Only include files within the working directory
           
           if (changedFiles.length === 0) {
             spinner.info('No changed files detected');
