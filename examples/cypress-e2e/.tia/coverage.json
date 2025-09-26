@@ -8,7 +8,7 @@
         "src/utils.js",
         "src/DynamicContent.jsx"
       ],
-      "timestamp": 1758873201618,
+      "timestamp": 1758873808659,
       "framework": "cypress",
       "metadata": {
         "status": "passed",
@@ -24,7 +24,7 @@
         "src/utils.js",
         "src/DynamicContent.jsx"
       ],
-      "timestamp": 1758873201620,
+      "timestamp": 1758873808659,
       "framework": "cypress",
       "metadata": {
         "status": "passed",
@@ -38,7 +38,7 @@
         "src/App.jsx",
         "src/index.jsx"
       ],
-      "timestamp": 1758873201620,
+      "timestamp": 1758873808660,
       "framework": "cypress",
       "metadata": {
         "status": "passed",
@@ -52,7 +52,7 @@
         "src/App.jsx",
         "src/index.jsx"
       ],
-      "timestamp": 1758873201621,
+      "timestamp": 1758873808661,
       "framework": "cypress",
       "metadata": {
         "status": "passed",
@@ -66,7 +66,7 @@
         "src/App.jsx",
         "src/index.jsx"
       ],
-      "timestamp": 1758873201621,
+      "timestamp": 1758873808661,
       "framework": "cypress",
       "metadata": {
         "status": "passed",
@@ -75,6 +75,6 @@
       }
     }
   },
-  "lastUpdated": 1758873201622,
+  "lastUpdated": 1758873808661,
   "rootDir": "/Users/psturc/dev/tia-js/examples/cypress-e2e"
 }

@@ -90,15 +90,45 @@ export class LineLevelAnalyzer {
 
     for (const file of changedFiles) {
       try {
-        // Get detailed diff for the file
-        const diffOutput = execSync(
-          `git diff --no-index --unified=0 /dev/null "${file}" 2>/dev/null || git diff --unified=0 HEAD "${file}" 2>/dev/null || echo "new file"`,
-          { 
-            cwd: this.rootDir,
-            encoding: 'utf-8',
-            stdio: ['pipe', 'pipe', 'pipe']
+        // Get detailed diff for the file - prioritize actual changes over new file detection
+        let diffOutput: string;
+        try {
+          // First try to get real diff against HEAD
+          diffOutput = execSync(
+            `git diff --unified=0 HEAD "${file}"`,
+            { 
+              cwd: this.rootDir,
+              encoding: 'utf-8',
+              stdio: ['pipe', 'pipe', 'pipe']
+            }
+          );
+          
+          // If no output, it might be a new file
+          if (!diffOutput.trim()) {
+            diffOutput = execSync(
+              `git diff --no-index --unified=0 /dev/null "${file}"`,
+              { 
+                cwd: this.rootDir,
+                encoding: 'utf-8',
+                stdio: ['pipe', 'pipe', 'pipe']
+              }
+            );
           }
-        );
+        } catch (error) {
+          // Fallback for new files
+          try {
+            diffOutput = execSync(
+              `git diff --no-index --unified=0 /dev/null "${file}"`,
+              { 
+                cwd: this.rootDir,
+                encoding: 'utf-8',
+                stdio: ['pipe', 'pipe', 'pipe']
+              }
+            );
+          } catch {
+            diffOutput = "new file";
+          }
+        }
 
         const lineNumbers = this.parseDiffForLineNumbers(diffOutput);
         

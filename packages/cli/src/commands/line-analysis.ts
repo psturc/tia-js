@@ -56,7 +56,13 @@ export const lineAnalysisCommand = new Command('line-analysis')
               const absolutePath = path.resolve(repoRoot, f);
               return path.relative(workingDir, absolutePath);
             })
-            .filter((f: string) => !f.startsWith('../')); // Only include files within the working directory
+            .filter((f: string) => !f.startsWith('../')) // Only include files within the working directory
+            .filter((f: string) => {
+              // Only analyze source files, not config/coverage/test files
+              return f.startsWith('src/') && 
+                     (f.endsWith('.js') || f.endsWith('.jsx') || f.endsWith('.ts') || f.endsWith('.tsx')) &&
+                     !f.includes('.test.') && !f.includes('.spec.');
+            });
           
           if (changedFiles.length === 0) {
             spinner.info('No changed files detected');

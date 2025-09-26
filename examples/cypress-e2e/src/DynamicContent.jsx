@@ -12,7 +12,7 @@ export function DynamicContent() {
 
   return (
     <div className="dynamic-content">
-      <h2 data-cy="dynamic-title">Dynamic Content Loaded Successfully!</h2>
+      <h2 data-cy="dynamic-title">Dynamic Content Loaded!</h2>
       <p data-cy="dynamic-message">
         This content was loaded dynamically and should only be covered by 
         tests that actually click the button. Enhanced for TIA demo.
