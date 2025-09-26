@@ -15,7 +15,7 @@ export class UserService {
   private nextId = 1;
 
   async getUserById(id: number): Promise<User> {
-    console.log(`Fetching user with ID: ${id}`);
+    console.log(`Fetching user with ID: ${id}`); // Enhanced user lookup
     
     const user = this.users.get(id);
     if (!user) {
