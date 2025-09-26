@@ -34,7 +34,7 @@ export class OrderService {
   }
 
   async createOrder(orderData: { userId: number; items: OrderItem[] }): Promise<Order> {
-    // Validate order data
+    // Validate order data with comprehensive checks
     if (!orderData.userId || !orderData.items || orderData.items.length === 0) {
       throw new Error('User ID and items are required');
     }

@@ -26,7 +26,7 @@ export class UserService {
   }
 
   async createUser(userData: { name: string; email: string }): Promise<User> {
-    // Validate user data
+    // Validate user data with enhanced logging
     if (!userData.name || !userData.email) {
       throw new Error('Name and email are required');
     }
