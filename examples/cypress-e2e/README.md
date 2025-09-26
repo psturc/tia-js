@@ -1,274 +1,112 @@
-# TIA Cypress E2E Example with Webpack-Based Coverage
+# TIA.js Cypress Example - Production Workflow
 
-This example demonstrates **Test Impact Analysis (TIA)** with **Cypress E2E tests** using **webpack-based code coverage instrumentation** for maximum precision.
+This example demonstrates **Test Impact Analysis** for a React application with **surgical line-level precision**.
 
-## 🎯 **Key Features**
+## 🎯 What This Demonstrates
 
-- ✅ **Webpack-based instrumentation** (no manual instrumentation scripts)
-- ✅ **Automatic coverage collection** during Cypress test runs  
-- ✅ **Precise test selection** based on actual code coverage
-- ✅ **Build-time optimization** for production vs coverage builds
-- ✅ **Clean separation** between dev and coverage workflows
+- **Line-level TIA**: Identifies which tests cover specific changed lines
+- **Perfect separation**: Navigation tests vs. Dynamic content tests
+- **PR workflow**: Ready for CI/CD integration
+- **Dynamic imports**: True module separation for accurate coverage
 
-## 🏗️ **Architecture**
+## 🏗️ Architecture
 
-### **Webpack Build Pipeline**
 ```
-Source Code → Webpack → Babel → Istanbul → Instrumented Bundle
+src/
+├── App.jsx              # Main component (covered by both test suites)
+├── DynamicContent.jsx   # Only loaded when button clicked (dynamic import)
+├── utils.js             # Only used by dynamic content
+└── index.jsx            # React entry point
+
+cypress/e2e/
+├── main-page.cy.js      # Tests main page only (no dynamic content)
+└── dynamic-content.cy.js # Tests button click + dynamic content
+
+.tia/
+└── per-test-coverage/   # Per-test coverage data (synced from server)
 ```
 
-### **Coverage Collection Flow**
-```
-Cypress Test → Instrumented Code → Coverage Data → TIA Storage → Precise Test Selection
-```
+## 🚀 Usage
 
-## 🚀 **Getting Started**
-
-### **1. Install Dependencies**
+### Development Workflow
 ```bash
-yarn install
+# Make changes to source files
+echo "// New feature" >> src/utils.js
+
+# See detailed impact analysis
+yarn tia:line-analysis
+
+# Get affected tests for CI/CD
+yarn tia:affected-tests
 ```
 
-### **2. Build Options**
-
-**Production Build** (optimized, no coverage):
+### CI/CD Integration
 ```bash
-npm run build
-npm run dev
+# In your CI pipeline:
+AFFECTED_TESTS=$(tia affected-tests --format specs)
+if [ -n "$AFFECTED_TESTS" ]; then
+  cypress run --spec "$AFFECTED_TESTS"
+else
+  echo "No tests affected - skipping test execution"
+fi
 ```
 
-**Coverage Build** (instrumented for TIA):
-```bash
-npm run build:coverage
-npm run dev:coverage
+## 📊 Example Results
+
+**Change to `src/utils.js`:**
+```
+Summary:
+  Total changed lines: 1
+  Coverage percentage: 100.0%
+  Affected tests: 1
+
+Result: Only dynamic-content.cy.js runs
 ```
 
-### **3. Run Tests**
+**Change to `src/App.jsx`:**
+```
+Summary:
+  Total changed lines: 1  
+  Coverage percentage: 100.0%
+  Affected tests: 2
 
-**Standard Cypress Tests**:
-```bash
-npm run test
+Result: Both main-page.cy.js and dynamic-content.cy.js run
 ```
 
-**Cypress Tests with Coverage Collection**:
-```bash
-npm run test:coverage
-```
+## 🔧 Setup Requirements
 
-## 📊 **TIA Commands**
+### 1. Coverage Data Collection
+Coverage data must be available in `.tia/per-test-coverage/`. In production:
 
-### **Coverage Management**
-```bash
-# View coverage statistics
-yarn tia coverage stats
+1. **Periodic job** runs all tests against main branch
+2. **Collects per-test coverage** using Cypress hooks
+3. **Uploads to TIA server** (S3, database, etc.)
+4. **PR pipeline syncs** data to `.tia/per-test-coverage/`
 
-# Clear coverage data
-yarn tia coverage clear --yes
-```
+### 2. Webpack Configuration
+- **Build-time instrumentation** with babel-plugin-istanbul
+- **Dynamic imports** for true module separation  
+- **Source maps** for accurate line mapping
 
-### **Analysis Commands**
-```bash
-# Coverage-based analysis (most precise)
-yarn tia analyze --use-coverage
+### 3. Cypress Integration
+- **Per-test coverage collection** in `cypress/support/e2e.js`
+- **Coverage tasks** in `cypress.config.js`
+- **Separate test files** for different app areas
 
-# Traditional dependency analysis (fallback)
-yarn tia analyze
+## ⚡ Performance Benefits
 
-# Run only affected tests
-yarn tia run --use-coverage
-```
+- **Faster CI/CD**: Run only affected tests instead of entire suite
+- **Surgical precision**: Line-level granularity eliminates false positives
+- **Resource optimization**: Reduce compute costs and feedback time
+- **Developer experience**: Instant feedback on test impact
 
-## 🎯 **Precision Demonstration**
+## 🧪 Demo Workflow
 
-### **Traditional Approach** (E2E Heuristic):
-- ❌ **Any change → ALL E2E tests run**
-- ❌ **CSS change → Calculator + Navigation tests**
-- ❌ **JS change → Calculator + Navigation tests**
-
-### **Real Coverage-Based Approach**:
-- ✅ **JavaScript changes** → Tests that actually execute the changed code (from NYC coverage)
-- 🔄 **Asset changes** → Intelligent fallback (dependency analysis, heuristics)
-- 🎯 **Hybrid strategy** → NYC for JS, fallback for assets
-
-### **How to Experience Coverage-Based TIA Progression**:
-
-**Initial State** (Clean - No Coverage Data):
-```bash
-yarn tia coverage stats          # Shows: No coverage data found
-yarn tia analyze --use-coverage  # Falls back to traditional analysis
-```
-
-**After Running Tests** (Coverage Data Collected):
-```bash
-npm run test:coverage            # Collect per-test coverage data
-yarn tia coverage stats          # Shows: X tests with coverage data
-yarn tia analyze --use-coverage  # Uses precise coverage-based analysis
-```
-
-**Compare Precision**:
-```bash
-# Edit src/calculator.js
-yarn tia analyze                 # Traditional: Both tests affected
-yarn tia analyze --use-coverage  # Coverage-based: Only calculator test
-```
-
-This demonstrates the **authentic progression** from traditional analysis to precision coverage-based selection.
-
-### **Real-World Workflow**:
-
-This example starts with **no coverage data** (authentic state). The workflow is:
-
-1. **First run** → TIA falls back to traditional analysis
-2. **Run tests with coverage** → `.nyc_output/out.json` gets created
-3. **Subsequent analysis** → TIA uses real coverage data for precision
-4. **JavaScript changes** → Surgical test selection based on actual execution
-5. **Asset changes** → Intelligent fallback strategies
-
-This demonstrates how TIA **gracefully degrades** when coverage is unavailable and **upgrades precision** when real coverage data exists.
-
-## ⚙️ **Configuration Files**
-
-### **webpack.config.js** - Production Build
-```javascript
-export default {
-  mode: 'production',
-  entry: './src/calculator.js',
-  // ... optimized for production
-};
-```
-
-### **webpack.coverage.config.js** - Coverage Build  
-```javascript
-export default merge(baseConfig, {
-  mode: 'development',
-  module: {
-    rules: [{
-      test: /\.js$/,
-      use: {
-        loader: 'babel-loader',
-        options: {
-          plugins: [['babel-plugin-istanbul', { /* config */ }]]
-        }
-      }
-    }]
-  }
-});
-```
-
-### **.babelrc** - Babel Configuration
-```json
-{
-  "presets": ["@babel/preset-env"],
-  "env": {
-    "test": {
-      "plugins": [["babel-plugin-istanbul", {
-        "exclude": ["**/*.cy.js", "**/cypress/**"]
-      }]]
-    }
-  }
-}
-```
-
-### **cypress.config.js** - Cypress + Coverage (ES Module)
-```javascript
-import { defineConfig } from 'cypress';
-import { createRequire } from 'module';
-
-const require = createRequire(import.meta.url);
-
-export default defineConfig({
-  e2e: {
-    setupNodeEvents(on, config) {
-      // Code coverage setup with error handling
-      try {
-        require('@cypress/code-coverage/task')(on, config);
-      } catch (error) {
-        console.warn('[Coverage] Plugin failed to load:', error.message);
-      }
-      
-      // TIA coverage data collection
-      on('task', {
-        'tia:storeCoverage': async ({ testFile, executedFiles, metadata }) => {
-          // Store coverage in TIA format
-        }
-      });
-    }
-  }
-});
-```
-
-## 🔬 **Technical Details**
-
-### **Webpack Benefits**
-- **Build-time instrumentation** vs runtime injection
-- **Source map support** for accurate coverage mapping
-- **Production optimization** when coverage not needed
-- **Module bundling** handles dependencies automatically
-
-### **Istanbul Integration**
-- **Industry standard** coverage instrumentation
-- **Precise line/branch tracking** 
-- **Configurable exclusions**
-- **JSON coverage format** for programmatic access
-
-### **TIA Integration**
-- **Automatic coverage storage** during test runs
-- **Path normalization** between webpack and file system
-- **Metadata tracking** (duration, status, test names)
-- **Hybrid fallback** to dependency analysis when needed
-
-## 🚀 **Performance Impact**
-
-### **CI/CD Time Savings**
-- **Baseline**: Run all E2E tests every time
-- **Webpack TIA**: Run only affected tests  
-- **Potential savings**: 50-80% reduction in E2E test time
-
-### **Example Scenarios**
-- **10 E2E tests, CSS change**: 1 test instead of 10 (**90% reduction**)
-- **20 E2E tests, specific component change**: 3 tests instead of 20 (**85% reduction**)
-- **100 E2E tests, utility function change**: 15 tests instead of 100 (**85% reduction**)
-
-## 🔧 **Troubleshooting**
-
-### **ES Module Configuration**
-Since we use `"type": "module"` in package.json, all `.js` files are treated as ES modules:
-
-- ✅ **Cypress config**: Uses `import/export` with `createRequire()` for CommonJS compatibility
-- ✅ **TIA config**: Renamed to `.cjs` to remain CommonJS
-- ✅ **Webpack configs**: Use ES module `import/export`
-
-### **Common Issues**
-
-**Error: "require is not defined in ES module scope"**
-```bash
-# Solution: Use createRequire() in Cypress config
-import { createRequire } from 'module';
-const require = createRequire(import.meta.url);
-```
-
-**Error: "Cannot find module './tia.config.js'"**
-```bash
-# Solution: Config file was renamed to .cjs
-require('../../tia.config.cjs'); // ✅ Correct
-require('../../tia.config.js');  // ❌ Old path
-```
-
-**Cypress installation issues**
-```bash
-# Some environments may have Cypress binary issues
-# The configuration syntax is correct regardless
-node -c cypress.config.js  # Verify config syntax
-```
-
-## 🎯 **Next Steps**
-
-1. **Real Cypress Integration**: Replace simulation with actual Cypress runs
-2. **Multi-framework**: Extend to Playwright and Jest with webpack  
-3. **Advanced Coverage**: Add branch/function coverage analysis
-4. **Performance Monitoring**: Track TIA effectiveness over time
-5. **Team Integration**: CI/CD pipeline integration guides
+Run `./demo-ci-workflow.sh` to see the complete TIA workflow in action!
 
 ---
 
-**This represents a significant advancement in E2E test optimization, providing surgical precision in test selection while maintaining the confidence that all necessary tests are executed.** 🎯
+**Next Steps**: 
+1. Set up TIA server for coverage data management
+2. Integrate into your CI/CD pipeline  
+3. Enjoy faster, more precise test execution! 🚀

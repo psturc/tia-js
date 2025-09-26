@@ -1,7 +1,7 @@
 {
   "name": "tia-js",
   "version": "1.0.0",
-  "description": "Test Impact Analysis ecosystem for multiple testing frameworks",
+  "description": "Streamlined Test Impact Analysis for PR workflows - Line-level precision for test optimization",
   "private": true,
   "workspaces": [
     "packages/*"

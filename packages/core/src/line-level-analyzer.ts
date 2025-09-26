@@ -178,7 +178,7 @@ export class LineLevelAnalyzer {
    */
   private async findTestsCoveringLines(file: string, lines: number[]): Promise<LineCoverageResult[]> {
     const results: LineCoverageResult[] = [];
-    const perTestDir = path.join(this.rootDir, '.nyc_output', 'per-test');
+    const perTestDir = path.join(this.rootDir, '.tia', 'per-test-coverage');
     
     if (!fs.existsSync(perTestDir)) {
       this.logger.debug('No per-test coverage directory found');

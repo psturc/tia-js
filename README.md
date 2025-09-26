@@ -1,278 +1,209 @@
-# Test Impact Analysis (TIA) for JavaScript/TypeScript
+# TIA.js - Test Impact Analysis
 
-[![npm version](https://badge.fury.io/js/%40tia-js%2Fcli.svg)](https://badge.fury.io/js/%40tia-js%2Fcli)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+**Streamlined Test Impact Analysis for PR Workflows**
 
-A comprehensive Test Impact Analysis ecosystem that intelligently determines which tests to run based on code changes. Works across multiple testing frameworks with a unified API and CLI.
+TIA.js identifies exactly which tests need to run based on code changes, providing surgical precision for CI/CD optimization.
 
-## 🚀 Features
-
-- **Framework Agnostic**: Supports Jest, Cypress, and Playwright out of the box
-- **Intelligent Analysis**: Uses dependency graph analysis to find affected tests
-- **Git Integration**: Automatically detects changed files using Git
-- **Watch Mode**: Continuously monitors file changes and runs tests
-- **CLI & API**: Use via command line or integrate into your build pipeline
-- **TypeScript First**: Built with TypeScript, includes full type definitions
-- **Configurable**: Flexible configuration for different project structures
-
-## 📦 Packages
-
-This is a monorepo containing several packages:
-
-- **[@tia-js/cli](./packages/cli)** - Universal CLI tool
-- **[@tia-js/core](./packages/core)** - Core analysis engine
-- **[@tia-js/common](./packages/common)** - Shared types and utilities
-- **[@tia-js/cypress](./packages/cypress)** - Cypress adapter
-- **[@tia-js/playwright](./packages/playwright)** - Playwright adapter
-- **[@tia-js/jest](./packages/jest)** - Jest adapter
-
-## 🔧 Quick Start
+## 🚀 Quick Start
 
 ### Installation
 
 ```bash
-# Install the CLI globally
 npm install -g @tia-js/cli
-
-# Or use with npx
-npx @tia-js/cli --help
+# or
+yarn global add @tia-js/cli
 ```
 
-### Initialize Configuration
+### PR Workflow
 
 ```bash
-# Generate configuration file
-tia init
+# 1. Detailed analysis for developers
+tia line-analysis
+
+# 2. Get affected tests for CI/CD
+AFFECTED_TESTS=$(tia affected-tests --format specs)
+cypress run --spec "$AFFECTED_TESTS"
 ```
 
-### Basic Usage
+## 📋 Commands
+
+### `tia line-analysis`
+Provides detailed line-level analysis showing:
+- Which specific lines changed
+- Which tests cover those exact lines  
+- Coverage percentage of changed lines
+- Uncovered lines that need testing
+
+**Example output:**
+```
+📊 Line-Level Coverage Results
+Summary:
+  Total changed lines: 1
+  Covered changed lines: 1  
+  Coverage percentage: 100.0%
+  Affected tests: 2
+
+Tests Covering Changed Lines:
+┌─────────────────────────────────────────────────────────────────────┐
+│ Test Name → Covered Lines → Coverage %                           │
+├─────────────────────────────────────────────────────────────────────┤
+│ Dynamic Content Tests should load... 100.0% │
+│   cypress/e2e/dynamic/content.cy.js             │
+│   Lines: 17                                     │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+### `tia affected-tests`
+Outputs affected tests for CI/CD integration:
 
 ```bash
-# Analyze test impact
-tia analyze
+# Get full test identifiers (includes individual test names)
+tia affected-tests
+# Output: cypress/e2e/dynamic/content.cy.js::Dynamic Content Tests should load...
 
-# Run affected tests
-tia run
+# Get just test file names (for framework runners)
+tia affected-tests --format specs  
+# Output: cypress/e2e/dynamic/content.cy.js
 
-# Watch for changes and run tests automatically
-tia watch
+# Detailed output for debugging
+tia affected-tests --format detailed
 ```
 
-## 📖 Documentation
+## 🔧 Prerequisites
 
-### CLI Commands
+### Coverage Data
+TIA requires per-test coverage data in `.tia/per-test-coverage/`:
 
-#### `tia init`
-Initialize TIA configuration in your project.
-
-```bash
-tia init [options]
-
-Options:
-  -f, --force              Overwrite existing configuration
-  --config-file <name>     Configuration file name (default: "tia.config.js")
+```
+.tia/
+└── per-test-coverage/
+    ├── test_file_1__test_name_1.json
+    ├── test_file_2__test_name_2.json
+    └── ...
 ```
 
-#### `tia analyze`
-Analyze which tests are affected by code changes.
+**Production Setup:**
+1. Set up periodic job to run all tests against main branch
+2. Collect per-test coverage data  
+3. Upload to TIA server
+4. Sync to `.tia/per-test-coverage/` before PR analysis
 
-```bash
-tia analyze [options]
+### Git Repository
+- Committed baseline (for change detection)
+- Source files in `src/` directory
 
-Options:
-  -c, --config <path>      Path to configuration file
-  -b, --base <commit>      Base commit/branch to compare against (default: "HEAD")
-  --include-unstaged       Include unstaged changes
-  --include-untracked      Include untracked files
-  -f, --framework <name>   Force specific framework (cypress, playwright, jest)
-  --max-depth <number>     Maximum dependency analysis depth (default: "10")
-  --json                   Output results as JSON
-  --verbose                Verbose output
+## 🎯 How It Works
+
+1. **Change Detection**: Uses `git diff` to identify modified lines
+2. **Coverage Mapping**: Maps changed lines to test coverage data
+3. **Impact Analysis**: Identifies which tests cover the specific changed lines
+4. **Surgical Precision**: Only runs tests that actually cover your changes
+
+## 🏗️ CI/CD Integration
+
+### GitHub Actions Example
+```yaml
+- name: Get affected tests
+  id: tia
+  run: |
+    # Sync coverage data from TIA server
+    aws s3 sync s3://your-tia-bucket/.tia .tia/
+    
+    # Get affected tests
+    AFFECTED_TESTS=$(tia affected-tests --format specs)
+    echo "affected-tests=$AFFECTED_TESTS" >> $GITHUB_OUTPUT
+
+- name: Run affected tests
+  if: steps.tia.outputs.affected-tests != ''
+  run: cypress run --spec "${{ steps.tia.outputs.affected-tests }}"
 ```
 
-#### `tia run`
-Analyze and run affected tests.
-
-```bash
-tia run [options]
-
-Options:
-  -c, --config <path>      Path to configuration file
-  -b, --base <commit>      Base commit/branch to compare against (default: "HEAD")
-  --include-unstaged       Include unstaged changes
-  --include-untracked      Include untracked files
-  -f, --framework <name>   Force specific framework (cypress, playwright, jest)
-  --max-depth <number>     Maximum dependency analysis depth (default: "10")
-  --dry-run                Show what would be run without executing tests
-  -y, --yes                Skip confirmation prompts
-  --verbose                Verbose output
-```
-
-#### `tia watch`
-Watch for file changes and run affected tests automatically.
-
-```bash
-tia watch [options]
-
-Options:
-  -c, --config <path>      Path to configuration file
-  -b, --base <commit>      Base commit/branch to compare against (default: "HEAD")
-  --include-unstaged       Include unstaged changes (default: true)
-  --include-untracked      Include untracked files
-  -f, --framework <name>   Force specific framework (cypress, playwright, jest)
-  --max-depth <number>     Maximum dependency analysis depth (default: "10")
-  --debounce <ms>          Debounce time for file changes (default: "1000")
-  --auto-run               Automatically run tests without confirmation
-  --verbose                Verbose output
-```
-
-### Configuration
-
-Create a `tia.config.js` file in your project root:
-
-```javascript
-module.exports = {
-  // Project root directory
-  rootDir: process.cwd(),
-  
-  // Source file extensions to analyze
-  sourceExtensions: ['.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs'],
-  
-  // Test file extensions
-  testExtensions: ['.test.ts', '.test.tsx', '.test.js', '.test.jsx', '.spec.ts', '.spec.tsx', '.spec.js', '.spec.jsx'],
-  
-  // Patterns to ignore during analysis
-  ignorePatterns: ['node_modules/**', 'dist/**', 'build/**', 'coverage/**', '.git/**'],
-  
-  // Maximum depth for dependency analysis
-  maxDepth: 10,
-  
-  // Include indirect dependencies
-  includeIndirect: true,
-  
-  // Framework-specific configuration
-  frameworks: {
-    cypress: {
-      configFile: 'cypress.config.js',
-      specPattern: 'cypress/e2e/**/*.cy.{js,jsx,ts,tsx}'
-    },
-    playwright: {
-      configFile: 'playwright.config.js',
-      testDir: 'tests'
-    },
-    jest: {
-      configFile: 'jest.config.js'
+### Jenkins Pipeline Example
+```groovy
+pipeline {
+  stages {
+    stage('TIA Analysis') {
+      steps {
+        // Sync coverage data
+        sh 'curl -o .tia.tar.gz https://your-tia-server/latest-coverage'
+        sh 'tar -xzf .tia.tar.gz'
+        
+        // Get affected tests
+        script {
+          env.AFFECTED_TESTS = sh(
+            script: 'tia affected-tests --format specs',
+            returnStdout: true
+          ).trim()
+        }
+      }
+    }
+    stage('Run Tests') {
+      when { expression { env.AFFECTED_TESTS != '' } }
+      steps {
+        sh "cypress run --spec '${env.AFFECTED_TESTS}'"
+      }
     }
   }
-};
+}
 ```
 
-### API Usage
+## 🧪 Framework Support
 
-You can also use TIA programmatically:
+Currently supports:
+- **Cypress** (E2E tests with webpack/babel instrumentation)
+- **Jest** (Unit tests - coming soon)
+- **Playwright** (E2E tests - coming soon)
 
-```typescript
-import { TIAEngine } from '@tia-js/core';
-import { CypressAdapter } from '@tia-js/cypress';
-import { PlaywrightAdapter } from '@tia-js/playwright';
-import { JestAdapter } from '@tia-js/jest';
-
-// Create TIA engine
-const engine = new TIAEngine({
-  rootDir: process.cwd(),
-  sourceExtensions: ['.ts', '.js'],
-  testExtensions: ['.test.ts', '.test.js'],
-  maxDepth: 10
-});
-
-// Register framework adapters
-engine.registerAdapter(new CypressAdapter());
-engine.registerAdapter(new PlaywrightAdapter());
-engine.registerAdapter(new JestAdapter());
-
-// Run analysis
-const result = await engine.analyze({
-  base: 'main',
-  includeUnstaged: true
-});
-
-console.log(\`Found \${result.affectedTests.length} affected tests\`);
-
-// Run tests
-await engine.runTests(result);
-```
-
-## 🏗️ Architecture
-
-The TIA ecosystem follows a modular architecture:
+## 📁 Directory Structure
 
 ```
-┌─────────────────┐
-│   @tia-js/cli   │  ← Universal CLI interface
-└─────────────────┘
-         │
-┌─────────────────┐
-│  @tia-js/core   │  ← Core analysis engine
-└─────────────────┘
-         │
-┌─────────────────┐
-│ @tia-js/common  │  ← Shared types & utilities
-└─────────────────┘
-         │
-    ┌────┴────┐
-    │ Adapters │
-    └─────────┘
-    │    │    │
-┌───▼┐ ┌─▼─┐ ┌▼────┐
-│Jest│ │Cyp│ │Plwr │  ← Framework-specific adapters
-└────┘ └───┘ └─────┘
+your-project/
+├── .tia/
+│   ├── per-test-coverage/          # Synced from TIA server
+│   └── coverage.json               # TIA storage (auto-generated)
+├── src/                           # Source files to analyze
+├── cypress/e2e/                  # Test files
+└── package.json
 ```
 
-### Core Components
+## ⚡ Performance
 
-1. **TIA Engine**: Main orchestrator that coordinates analysis and test execution
-2. **Dependency Analyzer**: Builds and analyzes the project dependency graph
-3. **Change Detector**: Detects file changes using Git
-4. **Framework Adapters**: Handle framework-specific test discovery and execution
+- **Fast**: Only analyzes changed lines (not entire codebase)
+- **Precise**: Line-level granularity eliminates false positives
+- **Scalable**: Works with large codebases and test suites
+- **Lightweight**: Minimal dependencies and fast startup
 
-## 🔄 How It Works
+## 🔍 Troubleshooting
 
-1. **Change Detection**: TIA uses Git to detect which files have changed
-2. **Dependency Analysis**: Builds a dependency graph of your project
-3. **Impact Calculation**: Determines which tests are affected by the changes
-4. **Test Prioritization**: Assigns priority scores to tests based on impact
-5. **Test Execution**: Runs the affected tests using the appropriate framework
-
-## 🤝 Contributing
-
-We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
-
-### Development Setup
-
-```bash
-# Clone the repository
-git clone https://github.com/your-org/tia-js.git
-cd tia-js
-
-# Install dependencies
-npm install
-
-# Bootstrap packages
-npm run bootstrap
-
-# Build all packages
-npm run build
-
-# Run tests
-npm test
+### No coverage data found
 ```
+ERROR: No coverage data found in .tia/per-test-coverage/
+```
+**Solution**: Sync coverage data from your TIA server before running analysis.
 
-## 📄 License
+### No affected tests
+```
+# Empty output from tia affected-tests
+```
+**Causes**: 
+- No tests cover the changed lines
+- Coverage data is outdated
+- Changes are in comments/non-executable code
 
-MIT © [Your Name](https://github.com/your-org)
+### Line analysis shows 0 changes
+**Solution**: Ensure you have committed your baseline and made changes to source files in `src/`.
 
-## 🙏 Acknowledgments
+## 📖 Architecture
 
-- Inspired by Facebook's Jest test runner and its watch mode
-- Built with TypeScript and modern Node.js practices
-- Uses Git for reliable change detection
+TIA.js uses **line-level coverage mapping** to provide surgical precision:
+
+1. **Build-time instrumentation** (webpack/babel) tracks code coverage
+2. **Per-test collection** stores individual test coverage profiles  
+3. **Git diff parsing** identifies exact changed lines
+4. **Coverage intersection** maps changed lines to covering tests
+5. **Smart filtering** eliminates false positives from bundling
+
+---
+
+**License**: MIT  
+**Repository**: https://github.com/your-org/tia-js

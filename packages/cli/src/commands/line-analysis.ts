@@ -78,6 +78,23 @@ export const lineAnalysisCommand = new Command('line-analysis')
         }
       }
       
+      // Check if coverage data exists
+      const path = require('path');
+      const fs = require('fs');
+      const coverageDir = path.join(workingDir, '.tia', 'per-test-coverage');
+      
+      if (!fs.existsSync(coverageDir)) {
+        spinner.fail('Coverage data not found');
+        console.log();
+        console.log(chalk.yellow('⚠️  No coverage data found in .tia/per-test-coverage/'));
+        console.log();
+        console.log(chalk.bold('To use TIA:'));
+        console.log('  1. Sync coverage data from your TIA server to .tia/per-test-coverage/');
+        console.log('  2. Ensure coverage data is up-to-date with the main branch');
+        console.log('  3. Run TIA commands against your PR changes');
+        process.exit(1);
+      }
+      
       // Perform line-level analysis
       const result = await analyzer.analyzeChangedLines(changedFiles);
       

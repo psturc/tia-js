@@ -25,7 +25,7 @@ export default defineConfig({
             const path = require('path');
             
             // Create per-test coverage directory
-            const outDir = path.join(process.cwd(), '.nyc_output', 'per-test');
+            const outDir = path.join(process.cwd(), '.tia', 'per-test-coverage');
             if (!fs.existsSync(outDir)) {
               fs.mkdirSync(outDir, { recursive: true });
             }

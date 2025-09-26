@@ -1,36 +1,24 @@
 #!/usr/bin/env node
 
 /**
- * TIA CLI Entry Point
+ * TIA CLI Entry Point - Streamlined for PR Workflow
  */
 
 import { Command } from 'commander';
 import chalk from 'chalk';
-import { analyzeCommand } from '../commands/analyze';
-import { runCommand } from '../commands/run';
-import { watchCommand } from '../commands/watch';
-import { initCommand } from '../commands/init';
-import { coverageCommand } from '../commands/coverage';
 import { lineAnalysisCommand } from '../commands/line-analysis';
+import { affectedTestsCommand } from '../commands/affected-tests';
 
 const program = new Command();
 
 program
   .name('tia')
-  .description('Universal Test Impact Analysis CLI')
-  .version('1.0.0')
-  .configureHelp({
-    sortSubcommands: true,
-    subcommandTerm: (cmd) => cmd.name() + ' ' + cmd.usage()
-  });
+  .description('Test Impact Analysis CLI - Identify affected tests for PR workflows')
+  .version('1.0.0');
 
-// Add commands
-program.addCommand(initCommand);
-program.addCommand(analyzeCommand);
-program.addCommand(runCommand);
-program.addCommand(watchCommand);
-program.addCommand(coverageCommand);
+// Add core commands for PR workflow
 program.addCommand(lineAnalysisCommand);
+program.addCommand(affectedTestsCommand);
 
 // Add global options
 program
@@ -44,39 +32,27 @@ program.hook('preAction', (thisCommand) => {
   }
 });
 
-// Custom help
-program.configureOutput({
-  writeOut: (str) => process.stdout.write(str),
-  writeErr: (str) => process.stderr.write(str),
-  outputError: (str, write) => {
-    write(chalk.red(str));
-  }
-});
-
 // Enhanced help
 program.addHelpText('before', chalk.bold.blue(`
 ╔══════════════════════════════════════╗
 ║     Test Impact Analysis (TIA)       ║
-║   Universal Testing Framework CLI    ║
+║      Streamlined PR Workflow         ║
 ╚══════════════════════════════════════╝
 `));
 
 program.addHelpText('after', `
-${chalk.bold('Examples:')}
-  ${chalk.gray('$')} tia init                    ${chalk.gray('# Initialize TIA configuration')}
-  ${chalk.gray('$')} tia analyze                ${chalk.gray('# Analyze test impact')}
-  ${chalk.gray('$')} tia run                    ${chalk.gray('# Run affected tests')}
-  ${chalk.gray('$')} tia watch                  ${chalk.gray('# Watch for changes and run tests')}
-  ${chalk.gray('$')} tia analyze --base main    ${chalk.gray('# Compare against main branch')}
-  ${chalk.gray('$')} tia run --framework jest   ${chalk.gray('# Force Jest framework')}
+${chalk.bold('PR Workflow Commands:')}
+  ${chalk.gray('$')} tia line-analysis           ${chalk.gray('# Detailed analysis for developers')}
+  ${chalk.gray('$')} tia affected-tests          ${chalk.gray('# List affected tests for CI/CD')}
+  ${chalk.gray('$')} tia affected-tests --format specs ${chalk.gray('# Just test file names')}
 
-${chalk.bold('Framework Support:')}
-  • Jest (Unit/Integration tests)
-  • Cypress (E2E tests)  
-  • Playwright (E2E tests)
+${chalk.bold('Prerequisites:')}
+  • Coverage data synced to ${chalk.cyan('.tia/per-test-coverage/')} directory
+  • Git repository with committed baseline
 
-${chalk.bold('Documentation:')}
-  Visit ${chalk.cyan('https://github.com/your-org/tia-js')} for more information.
+${chalk.bold('CI/CD Integration:')}
+  ${chalk.gray('AFFECTED_TESTS=$(tia affected-tests --format specs)')}
+  ${chalk.gray('cypress run --spec "$AFFECTED_TESTS"')}
 `);
 
 // Error handling

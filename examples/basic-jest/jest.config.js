@@ -10,8 +10,16 @@ module.exports = {
   transform: {
     '^.+\\.(ts|tsx)$': 'ts-jest',
   },
-  moduleNameMapper: {
-    '^@/(.*)$': '<rootDir>/src/$1',
-  },
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
+  
+  // Coverage configuration for TIA
+  coverageDirectory: '.tia/jest-coverage',
+  coverageReporters: ['json', 'lcov', 'text'],
+  collectCoverage: true,
+  
+  // Enable per-test coverage collection
+  reporters: [
+    'default',
+    ['<rootDir>/jest-tia-reporter.js', {}]
+  ]
 };
