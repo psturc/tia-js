@@ -1,17 +1,21 @@
 /**
- * Utility functions for the application (modified for per-test TIA demo)
+ * Utility functions for data processing
+ * This file should only be covered by tests that use the dynamic content
  */
 
-export function formatNumber(num) {
-  // Updated formatting function for TIA test
-  return parseFloat(num).toFixed(2);
+export function processData(input) {
+  // Simulate some data processing
+  const processed = input.toUpperCase().split('').reverse().join('');
+  console.log(`Processing data: ${input} -> ${processed}`);
+  return processed;
 }
 
-export function isValidNumber(value) {
-  return !isNaN(value) && isFinite(value);
+export function formatResult(data) {
+  // Format the result with some styling
+  return `✨ ${data} ✨`;
 }
 
-export function sanitizeInput(input) {
-  return input.toString().trim();
+export function getCurrentTimestamp() {
+  return new Date().toISOString();
 }
-// TIA test change
+// TIA line-level test: Enhanced utils processing

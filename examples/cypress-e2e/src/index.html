@@ -3,51 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TIA Cypress Example</title>
+    <title>TIA Demo App</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="container">
-        <!-- Navigation section - will be tested by navigation tests -->
-        <nav class="app-navigation">
-            <div id="breadcrumbs" data-cy="breadcrumbs"></div>
-            <div class="nav-info">
-                <span id="app-version" data-cy="app-version"></span>
-                <span id="debug-status" data-cy="debug-status"></span>
-            </div>
-        </nav>
-        
-        <h1 id="page-title" data-cy="page-title">Calculator App</h1>
-        <p id="page-description" data-cy="page-description">Perform basic mathematical calculations</p>
-        
-        <div class="calculator">
-            <input type="number" id="num1" placeholder="First number" data-cy="num1">
-            <select id="operation" data-cy="operation">
-                <option value="add">+</option>
-                <option value="subtract">-</option>
-                
-                <option value="multiply">×</option>
-                <option value="divide">÷</option>
-            </select>
-            <input type="number" id="num2" placeholder="Second number" data-cy="num2">
-            <button id="calculate" data-cy="calculate">Calculate</button>
-            <div id="result" data-cy="result"></div>
-        </div>
-
-        <div class="history">
-            <h2>History</h2>
-            <button id="clear-history" data-cy="clear-history">Clear History</button>
-            <ul id="history-list" data-cy="history-list"></ul>
-        </div>
-        
-        <footer class="app-footer">
-            <div class="version-info">
-                <span id="app-version" data-cy="app-version">Loading...</span>
-                <span id="debug-status" data-cy="debug-status"></span>
-            </div>
-        </footer>
-    </div>
-    
-    <!-- Webpack will inject the bundled JavaScript automatically -->
+    <div id="root"></div>
+    <!-- React app will be rendered here by webpack -->
 </body>
 </html>

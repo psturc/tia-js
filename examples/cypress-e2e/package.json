@@ -19,9 +19,14 @@
     "tia:run": "tia run",
     "tia:watch": "tia watch"
   },
+  "dependencies": {
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1"
+  },
   "devDependencies": {
     "@babel/core": "^7.22.0",
     "@babel/preset-env": "^7.22.0",
+    "@babel/preset-react": "^7.27.1",
     "@cypress/code-coverage": "^3.12.8",
     "babel-loader": "^9.1.3",
     "babel-plugin-istanbul": "^6.1.1",
