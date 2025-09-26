@@ -13,6 +13,7 @@ build/
 coverage/
 .nyc_output/
 .tia/
+examples/*/.tia/
 
 # Runtime data
 pids/
