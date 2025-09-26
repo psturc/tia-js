@@ -311,9 +311,12 @@ export class LineLevelAnalyzer {
   private normalizeSpecName(specName: string): string {
     return specName
       .replace(/_cy_js$/, '.cy.js')
-      .replace(/_test_js$/, '.test.js')  
-      .replace(/_spec_js$/, '.spec.js')
-      .replace(/_js$/, '.js')
-      .replace(/_/g, '/');
+      .replace(/_test_ts$/, '.test.ts')    // Handle TypeScript test files
+      .replace(/_test_js$/, '.test.js')    // Handle JavaScript test files
+      .replace(/_spec_ts$/, '.spec.ts')    // Handle TypeScript spec files
+      .replace(/_spec_js$/, '.spec.js')    // Handle JavaScript spec files
+      .replace(/_ts$/, '.ts')              // Handle TypeScript files
+      .replace(/_js$/, '.js')              // Handle JavaScript files
+      .replace(/_/g, '/');                 // Convert remaining underscores to slashes
   }
 }

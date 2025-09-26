@@ -1,106 +1,114 @@
-# TIA Jest Example
+# TIA.js Jest Example - Node.js Server
 
-This example demonstrates how to use Test Impact Analysis with Jest for unit testing.
+This example demonstrates **Test Impact Analysis** for a Node.js Express server with **Jest unit tests**.
 
-## Setup
+## 🎯 What This Demonstrates
 
-1. Install dependencies:
-```bash
-npm install
-```
+- **Line-level TIA** for backend services
+- **Perfect separation** between user tests vs. order tests  
+- **Jest integration** with per-test coverage collection
+- **CI/CD workflow** for Node.js applications
 
-2. Initialize TIA configuration (optional, already configured):
-```bash
-npx tia init
-```
-
-## Usage
-
-### Run all tests normally
-```bash
-npm test
-```
-
-### Use TIA to analyze test impact
-```bash
-# Short form (recommended)
-yarn tia:analyze
-# or even shorter
-yarn tia analyze
-
-# Long form
-npm run tia:analyze
-```
-
-### Run only affected tests
-```bash
-# Short form (recommended)
-yarn tia:run
-# or
-yarn tia run
-
-# Long form  
-npm run tia:run
-```
-
-### Watch mode with TIA
-```bash
-# Short form (recommended)
-yarn tia:watch
-# or
-yarn tia watch
-
-# Long form
-npm run tia:watch
-```
-
-## Example Scenario
-
-1. Make a change to `src/math.ts`:
-```typescript
-export function add(a: number, b: number): number {
-  console.log(`Adding ${a} + ${b}`); // Add this line
-  return a + b;
-}
-```
-
-2. Run TIA analysis:
-```bash
-npm run tia:analyze
-```
-
-You should see that both `math.test.ts` and `calculator.test.ts` are affected because:
-- `math.test.ts` directly imports and tests `math.ts`
-- `calculator.test.ts` tests `calculator.ts` which imports `math.ts`
-
-3. Run affected tests:
-```bash
-npm run tia:run
-```
-
-Only the affected tests will run instead of the entire test suite!
-
-## Project Structure
+## 🏗️ Architecture
 
 ```
 src/
-├── math.ts              # Math utility functions
-├── math.test.ts         # Tests for math utilities
-├── calculator.ts        # Calculator class (depends on math.ts)
-└── calculator.test.ts   # Tests for calculator class
+├── server.ts          # Express app with user & order endpoints
+├── user-service.ts    # User business logic (covered by user.test.ts)
+├── order-service.ts   # Order business logic (covered by order.test.ts)
+├── user.test.ts       # Tests user endpoints & UserService
+└── order.test.ts      # Tests order endpoints & OrderService
+
+.tia/
+└── per-test-coverage/ # Per-test Jest coverage data
 ```
 
-## TIA Configuration
+## 🚀 Usage
 
-The `tia.config.js` file configures:
-- Source file extensions: `.ts`, `.js`
-- Test file extensions: `.test.ts`, `.test.js`
-- Jest-specific configuration
-- Dependency analysis depth and patterns
+### Run Tests with Coverage Collection
+```bash
+yarn test:coverage
+# Generates per-test coverage in .tia/per-test-coverage/
+```
 
-## Benefits
+### TIA Analysis
+```bash
+# Make changes to source files
+echo "// Enhanced validation" >> src/user-service.ts
 
-- **Faster CI/CD**: Only run tests affected by changes
-- **Quick feedback**: Get test results faster during development
-- **Resource efficient**: Save compute time and resources
-- **Smart testing**: Automatically discover test dependencies
+# See detailed impact analysis  
+yarn tia:line-analysis
+
+# Get affected tests for CI/CD
+yarn tia:affected-tests
+```
+
+## 📊 Example Results
+
+**Change to `src/user-service.ts`:**
+```
+Summary:
+  Total changed lines: 1
+  Coverage percentage: 100.0%
+  Affected tests: 7
+
+Result: Only user.test.ts runs (order tests skipped)
+```
+
+**Change to `src/order-service.ts`:**
+```
+Summary:  
+  Total changed lines: 1
+  Coverage percentage: 100.0%
+  Affected tests: 7
+
+Result: Only order.test.ts runs (user tests skipped)
+```
+
+## 🔧 Jest Configuration
+
+### jest.config.js
+- **Per-test coverage collection** via custom reporter
+- **Coverage directory** set to `.tia/jest-coverage`
+- **TypeScript support** with ts-jest
+
+### jest-tia-reporter.js
+- **Custom Jest reporter** for TIA integration
+- **Saves individual test coverage** to `.tia/per-test-coverage/`
+- **Safe filename generation** for cross-platform compatibility
+
+## ⚡ CI/CD Integration
+
+### Example Pipeline
+```bash
+# Sync coverage data from TIA server
+curl -o .tia.tar.gz https://your-tia-server/latest-coverage
+tar -xzf .tia.tar.gz
+
+# Get affected tests
+AFFECTED_TESTS=$(tia affected-tests --format specs)
+
+# Run only affected tests  
+if [ -n "$AFFECTED_TESTS" ]; then
+  jest --testPathPattern="($AFFECTED_TESTS)"
+else
+  echo "No tests affected - skipping test execution"
+fi
+```
+
+### Benefits
+- **50-90% faster CI/CD** (only run affected tests)
+- **Surgical precision** (line-level change detection)
+- **Resource optimization** (reduce compute costs)
+- **Faster feedback** (developers get results quicker)
+
+## 🧪 Demo
+
+Run `./demo-node-tia.sh` to see the complete workflow in action!
+
+---
+
+**Next Steps**: 
+1. Set up TIA server for coverage data synchronization
+2. Integrate into your CI/CD pipeline
+3. Enjoy faster, more precise test execution! 🚀
