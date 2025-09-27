@@ -65,3 +65,7 @@ lerna-debug.log
 # Package lock files (using npm workspaces)
 package-lock.json
 yarn.lock
+
+__pycache__/
+
+.pytest_cache/

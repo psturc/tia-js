@@ -88,9 +88,26 @@ TIA requires per-test coverage data in `.tia/per-test-coverage/`:
 3. Upload to TIA server
 4. Sync to `.tia/per-test-coverage/` before PR analysis
 
+### Supported Languages & Frameworks
+
+#### JavaScript/TypeScript
+- **Frameworks**: Jest, Cypress, Playwright
+- **Coverage**: NYC/Istanbul format
+- **Test Patterns**: `*.test.js`, `*.spec.js`, `*.cy.js`
+
+#### Go
+- **Frameworks**: Ginkgo, standard Go testing
+- **Coverage**: Go coverage profiles converted to TIA format
+- **Test Patterns**: `*_test.go`
+
+#### Python
+- **Frameworks**: pytest
+- **Coverage**: coverage.py converted to TIA format
+- **Test Patterns**: `test_*.py`, `*_test.py`
+
 ### Git Repository
 - Committed baseline (for change detection)
-- Source files in `src/` directory
+- Source files in appropriate directories (`src/` for JS/TS, root for Go/Python)
 
 ## 🎯 How It Works
 
@@ -191,7 +208,33 @@ ERROR: No coverage data found in .tia/per-test-coverage/
 - Changes are in comments/non-executable code
 
 ### Line analysis shows 0 changes
-**Solution**: Ensure you have committed your baseline and made changes to source files in `src/`.
+**Solution**: Ensure you have committed your baseline and made changes to source files in appropriate directories.
+
+## 📚 Examples
+
+TIA.js includes complete example applications for each supported language:
+
+### JavaScript/TypeScript Examples
+- **`examples/basic-jest/`** - Jest unit tests with TIA integration
+- **`examples/cypress-e2e/`** - Cypress E2E tests with per-test coverage collection
+
+### Go Examples
+- **`examples/go-backend/`** - Go REST API with Ginkgo tests
+  - Gin web framework
+  - Ginkgo BDD testing
+  - TIA coverage reporter for Go
+
+### Python Examples  
+- **`examples/python-backend/`** - Python Flask API with pytest
+  - Flask REST API
+  - pytest testing framework
+  - TIA coverage plugin for Python
+
+Each example includes:
+- Complete application code
+- Test setup with TIA integration
+- Coverage collection configuration
+- README with setup instructions
 
 ## 📖 Architecture
 

@@ -1,6 +1,8 @@
 import { CoverageAnalysisResult, TestFile, CoverageMap, isTestFile } from '@tia-js/common';
 import { CoverageStorage } from './coverage-storage';
 import { NYCCoverageReader } from './nyc-coverage-reader';
+import { GoCoverageReader } from './go-coverage-reader';
+import { PythonCoverageReader } from './python-coverage-reader';
 import { DependencyAnalyzer } from './dependency-analyzer';
 import { createLogger, Logger } from '@tia-js/common';
 import * as path from 'path';
@@ -12,6 +14,8 @@ import * as fs from 'fs';
 export class CoverageAnalyzer {
   private coverageStorage: CoverageStorage;
   private nycReader: NYCCoverageReader;
+  private goReader: GoCoverageReader;
+  private pythonReader: PythonCoverageReader;
   private dependencyAnalyzer: DependencyAnalyzer;
   private logger: Logger;
   private rootDir: string;
@@ -22,6 +26,8 @@ export class CoverageAnalyzer {
     this.dependencyAnalyzer = dependencyAnalyzer;
     this.coverageStorage = new CoverageStorage(rootDir, logger);
     this.nycReader = new NYCCoverageReader(rootDir, logger);
+    this.goReader = new GoCoverageReader(rootDir, logger);
+    this.pythonReader = new PythonCoverageReader(rootDir, logger);
   }
 
   /**

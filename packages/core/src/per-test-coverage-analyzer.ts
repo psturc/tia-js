@@ -7,10 +7,14 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { TestFile, CoverageAnalysisResult, CoverageMap, TestCoverageData } from '@tia-js/common';
 import { NYCCoverageReader } from './nyc-coverage-reader';
+import { GoCoverageReader } from './go-coverage-reader';
+import { PythonCoverageReader } from './python-coverage-reader';
 import { createLogger, Logger } from '@tia-js/common';
 
 export class PerTestCoverageAnalyzer {
   private nycReader: NYCCoverageReader;
+  private goReader: GoCoverageReader;
+  private pythonReader: PythonCoverageReader;
   private logger: Logger;
   private rootDir: string;
 
@@ -18,22 +22,88 @@ export class PerTestCoverageAnalyzer {
     this.rootDir = rootDir;
     this.logger = logger;
     this.nycReader = new NYCCoverageReader(rootDir, logger);
+    this.goReader = new GoCoverageReader(rootDir, logger);
+    this.pythonReader = new PythonCoverageReader(rootDir, logger);
   }
 
   /**
-   * Create realistic coverage mapping based on NYC data
+   * Create realistic coverage mapping based on available coverage data
    * 
-   * IMPORTANT: NYC coverage is aggregated across all test runs.
-   * We can only show which files WERE covered, not which specific test covered them.
-   * This mapping shows potential relationships based on coverage presence.
+   * IMPORTANT: This method detects the available coverage format and uses the appropriate reader.
+   * For NYC: Coverage is aggregated across all test runs.
+   * For Go/Python: Uses per-test coverage files from TIA reporters.
    */
   async createPerTestMapping(): Promise<Map<string, string[]>> {
     const mapping = new Map<string, string[]>();
     
-    if (!this.nycReader.hasNYCCoverage()) {
-      this.logger.debug('No NYC coverage available for per-test mapping');
+    // Check which coverage format is available (prioritize per-test coverage)
+    if (this.hasPerTestCoverage()) {
+      this.logger.debug('Using per-test coverage data for mapping');
+      return this.createPerTestMappingFromTIA();
+    } else if (this.nycReader.hasNYCCoverage()) {
+      this.logger.debug('Using NYC coverage data for mapping');
+      return this.createPerTestMappingFromNYC();
+    } else {
+      this.logger.debug('No coverage data available for per-test mapping');
       return mapping;
     }
+  }
+
+  /**
+   * Check if per-test coverage data exists (Go or Python)
+   */
+  private hasPerTestCoverage(): boolean {
+    return this.goReader.hasGoCoverage() || this.pythonReader.hasPythonCoverage();
+  }
+
+  /**
+   * Create mapping from TIA per-test coverage files (Go/Python)
+   */
+  private async createPerTestMappingFromTIA(): Promise<Map<string, string[]>> {
+    const mapping = new Map<string, string[]>();
+    const perTestDir = path.join(this.rootDir, '.tia', 'per-test-coverage');
+    
+    if (!fs.existsSync(perTestDir)) {
+      return mapping;
+    }
+
+    const coverageFiles = fs.readdirSync(perTestDir).filter(f => f.endsWith('.json'));
+    
+    for (const coverageFile of coverageFiles) {
+      try {
+        const filePath = path.join(perTestDir, coverageFile);
+        const coverageData = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+        
+        // Parse test info from filename: specName__testName.json
+        const [specName, testName] = coverageFile.replace('.json', '').split('__', 2);
+        const testFile = this.normalizeTestFileName(specName);
+        
+        // Extract covered source files
+        const coveredFiles: string[] = [];
+        for (const [sourceFile, coverage] of Object.entries(coverageData)) {
+          if (this.isSourceFile(sourceFile) && this.hasCoverage(coverage)) {
+            coveredFiles.push(this.toRelativePath(sourceFile));
+          }
+        }
+        
+        if (coveredFiles.length > 0) {
+          mapping.set(testFile, coveredFiles);
+          this.logger.debug(`Mapped test ${testFile} to ${coveredFiles.length} source files`);
+        }
+        
+      } catch (error) {
+        this.logger.debug(`Failed to process coverage file ${coverageFile}: ${error instanceof Error ? error.message : String(error)}`);
+      }
+    }
+    
+    return mapping;
+  }
+
+  /**
+   * Create mapping from NYC coverage data (JavaScript/TypeScript)
+   */
+  private async createPerTestMappingFromNYC(): Promise<Map<string, string[]>> {
+    const mapping = new Map<string, string[]>();
 
     try {
       // Read the raw NYC coverage data
@@ -289,15 +359,103 @@ export class PerTestCoverageAnalyzer {
 
 
   /**
+   * Normalize test file name from coverage file naming
+   */
+  private normalizeTestFileName(specName: string): string {
+    // Convert from sanitized name back to test file path
+    // e.g., "users_test" -> "tests/test_users.py" or "users_spec" -> "users.spec.js"
+    
+    // Handle Go test files
+    if (specName.includes('_test')) {
+      return specName.replace(/_/g, '/') + '.go';
+    }
+    
+    // Handle Python test files
+    if (specName.startsWith('test_') || specName.includes('_test_')) {
+      return 'tests/' + specName.replace(/_/g, '_') + '.py';
+    }
+    
+    // Handle JavaScript test files
+    if (specName.includes('_spec') || specName.includes('_test')) {
+      return specName.replace(/_/g, '/') + '.js';
+    }
+    
+    // Default fallback
+    return specName.replace(/_/g, '/') + '.test.js';
+  }
+
+  /**
+   * Check if coverage data indicates the file was actually covered
+   */
+  private hasCoverage(coverage: any): boolean {
+    if (!coverage || typeof coverage !== 'object') {
+      return false;
+    }
+    
+    // Check statement hits
+    const statements = Object.values(coverage.s || {});
+    if (statements.some((hits: any) => hits > 0)) {
+      return true;
+    }
+    
+    // Check function hits
+    const functions = Object.values(coverage.f || {});
+    if (functions.some((hits: any) => hits > 0)) {
+      return true;
+    }
+    
+    return false;
+  }
+
+  /**
+   * Convert absolute path to relative path
+   */
+  private toRelativePath(absolutePath: string): string {
+    if (absolutePath.startsWith(this.rootDir)) {
+      return path.relative(this.rootDir, absolutePath);
+    }
+    return absolutePath;
+  }
+
+  /**
    * Check if a file path represents a source file we should analyze
    */
   private isSourceFile(filePath: string): boolean {
-    return filePath.includes('/src/') && 
-           filePath.endsWith('.js') &&
-           !filePath.includes('node_modules') &&
-           !filePath.includes('/test/') &&
-           !filePath.includes('.test.') &&
-           !filePath.includes('.spec.');
+    // Handle different file types
+    const isJavaScript = filePath.endsWith('.js') || filePath.endsWith('.ts') || filePath.endsWith('.jsx') || filePath.endsWith('.tsx');
+    const isGo = filePath.endsWith('.go') && !filePath.endsWith('_test.go');
+    const isPython = filePath.endsWith('.py') && !filePath.includes('test_') && !filePath.includes('_test.py') && !filePath.includes('conftest.py');
+    
+    // Common exclusions
+    const isExcluded = filePath.includes('node_modules') ||
+                      filePath.includes('__pycache__') ||
+                      filePath.includes('/vendor/') ||
+                      filePath.includes('/.git/');
+    
+    if (isExcluded) {
+      return false;
+    }
+    
+    // JavaScript/TypeScript source files
+    if (isJavaScript) {
+      return filePath.includes('/src/') &&
+             !filePath.includes('/test/') &&
+             !filePath.includes('.test.') &&
+             !filePath.includes('.spec.');
+    }
+    
+    // Go source files
+    if (isGo) {
+      return true;
+    }
+    
+    // Python source files
+    if (isPython) {
+      return !filePath.includes('/tests/') &&
+             !filePath.startsWith('test_');
+    }
+    
+    return false;
   }
 
   /**

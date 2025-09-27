@@ -67,14 +67,20 @@ export class TIAEngine {
       const changedFiles = await this.changeDetector.detectChanges(options);
       this.logger.info(`Found ${changedFiles.length} changed files`);
 
-      // Step 2: Analyze using coverage data (try NYC first, then TIA storage)
+      // Step 2: Analyze using coverage data (try TIA storage first, then language-specific coverage)
       this.logger.info('Analyzing coverage data...');
       
       // Check what coverage data is available (prioritize TIA storage for accuracy)
       const coverageMap = await this.coverageAnalyzer['coverageStorage'].loadCoverageMap();
       const hasTIACoverage = coverageMap.tests.size > 0;
       const hasNYCCoverage = this.coverageAnalyzer['nycReader'].hasNYCCoverage();
-      const jsChanges = changedFiles.filter(f => f.path.endsWith('.js'));
+      const hasGoCoverage = this.coverageAnalyzer['goReader'].hasGoCoverage();
+      const hasPythonCoverage = this.coverageAnalyzer['pythonReader'].hasPythonCoverage();
+      
+      // Categorize changed files by language
+      const jsChanges = changedFiles.filter(f => f.path.endsWith('.js') || f.path.endsWith('.ts') || f.path.endsWith('.jsx') || f.path.endsWith('.tsx'));
+      const goChanges = changedFiles.filter(f => f.path.endsWith('.go'));
+      const pythonChanges = changedFiles.filter(f => f.path.endsWith('.py'));
       
       let coverageAnalysis;
       if (hasTIACoverage) {
@@ -82,6 +88,16 @@ export class TIAEngine {
         coverageAnalysis = await this.coverageAnalyzer.analyzeAffectedTests(
           changedFiles.map(f => f.path),
           'heuristic'
+        );
+      } else if (hasGoCoverage && goChanges.length > 0) {
+        this.logger.info('Using Go-based coverage analysis');
+        coverageAnalysis = await this.perTestCoverageAnalyzer.analyzeWithPerTestMapping(
+          changedFiles.map(f => f.path)
+        );
+      } else if (hasPythonCoverage && pythonChanges.length > 0) {
+        this.logger.info('Using Python-based coverage analysis');
+        coverageAnalysis = await this.perTestCoverageAnalyzer.analyzeWithPerTestMapping(
+          changedFiles.map(f => f.path)
         );
       } else if (hasNYCCoverage && jsChanges.length > 0) {
         this.logger.info('Using NYC-based coverage analysis');
