@@ -1,6 +1,6 @@
 module.exports = {
-  // Root directory for analysis
-  rootDir: process.cwd(),
+  // Root directory for analysis (go-backend subdirectory)
+  rootDir: require('path').join(__dirname),
   
   // Test patterns to identify test files
   testPatterns: [

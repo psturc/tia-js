@@ -41,9 +41,9 @@ export async function loadConfig(
   // Apply overrides
   config = deepMerge(config, overrides);
 
-  // Ensure rootDir is set
+  // Ensure rootDir is set to the actual working directory
   if (!config.rootDir) {
-    config.rootDir = process.cwd();
+    config.rootDir = process.env.INIT_CWD || process.cwd();
   }
 
   return config as TIAConfig;
@@ -53,16 +53,19 @@ export async function loadConfig(
  * Resolve configuration file path
  */
 async function resolveConfigPath(configPath?: string): Promise<string | null> {
+  // Use the actual working directory where the command was invoked
+  const actualWorkingDir = process.env.INIT_CWD || process.cwd();
+  
   if (configPath) {
     // Use provided path
     if (path.isAbsolute(configPath)) {
       return configPath;
     } else {
-      return path.resolve(process.cwd(), configPath);
+      return path.resolve(actualWorkingDir, configPath);
     }
   }
 
-  // Look for common config file names
+  // Look for common config file names in the actual working directory
   const configFiles = [
     'tia.config.js',
     'tia.config.ts',
@@ -75,7 +78,7 @@ async function resolveConfigPath(configPath?: string): Promise<string | null> {
   ];
 
   for (const configFile of configFiles) {
-    const fullPath = path.resolve(process.cwd(), configFile);
+    const fullPath = path.resolve(actualWorkingDir, configFile);
     if (await fileExists(fullPath)) {
       return fullPath;
     }

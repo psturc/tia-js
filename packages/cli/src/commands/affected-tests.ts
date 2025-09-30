@@ -14,12 +14,20 @@ export const affectedTestsCommand = new Command('affected-tests')
   .option('--format <format>', 'Output format: files, specs, or detailed', 'files')
   .action(async (options) => {
     try {
-      const config = await loadConfig(options.config);
+      // Determine the actual working directory where the command was invoked
+      const actualWorkingDir = process.env.INIT_CWD || process.cwd();
+      
+      // Load config relative to the actual working directory
+      const configPath = options.config ? 
+        (require('path').isAbsolute(options.config) ? options.config : require('path').resolve(actualWorkingDir, options.config)) :
+        undefined;
+      
+      const config = await loadConfig(configPath, { rootDir: actualWorkingDir });
       const { createLogger } = require('@tia-js/common');
       const logger = createLogger('error'); // Only show errors to keep output clean
       
-      // Use current working directory for analysis
-      const workingDir = process.cwd();
+      // Use config.rootDir for analysis, fallback to current working directory
+      const workingDir = config.rootDir || process.cwd();
       const analyzer = new LineLevelAnalyzer(workingDir, logger);
       
       // Determine which files to analyze
@@ -49,9 +57,14 @@ export const affectedTestsCommand = new Command('affected-tests')
             .filter((f: string) => !f.startsWith('../')) // Only include files within the working directory
             .filter((f: string) => {
               // Only analyze source files, not config/coverage/test files
-              return f.startsWith('src/') && 
-                     (f.endsWith('.js') || f.endsWith('.jsx') || f.endsWith('.ts') || f.endsWith('.tsx')) &&
-                     !f.includes('.test.') && !f.includes('.spec.');
+              const isJSFile = f.startsWith('src/') && 
+                               (f.endsWith('.js') || f.endsWith('.jsx') || f.endsWith('.ts') || f.endsWith('.tsx')) &&
+                               !f.includes('.test.') && !f.includes('.spec.');
+              
+              const isGoFile = f.endsWith('.go') && !f.endsWith('_test.go');
+              const isPythonFile = f.endsWith('.py') && !f.includes('test_') && !f.endsWith('_test.py');
+              
+              return isJSFile || isGoFile || isPythonFile;
             });
           
           if (changedFiles.length === 0) {

@@ -23,7 +23,7 @@ export class OrderService {
   private nextId = 1;
 
   async getOrderById(id: number): Promise<Order> {
-    console.log(`Fetching order with ID: ${id}`);
+    console.log(`Fetching order with ID: ${id} `);
     
     const order = this.orders.get(id);
     if (!order) {

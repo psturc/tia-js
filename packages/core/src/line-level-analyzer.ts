@@ -230,10 +230,14 @@ export class LineLevelAnalyzer {
     
     this.logger.debug(`Looking for coverage of: ${targetFile}`);
     this.logger.debug(`Normalized target: ${normalizedTargetFile}`);
+    this.logger.debug(`Root dir: ${this.rootDir}`);
     
     // Look for the file in coverage data (could be absolute or relative path)
     for (const [filePath, coverage] of Object.entries(coverageData)) {
-      const normalizedFilePath = path.resolve(filePath);
+      // Resolve coverage file path relative to the same root directory
+      const normalizedFilePath = path.isAbsolute(filePath) ? 
+        filePath : 
+        path.resolve(this.rootDir, filePath);
       
       this.logger.debug(`Checking coverage file: ${filePath} -> ${normalizedFilePath}`);
       

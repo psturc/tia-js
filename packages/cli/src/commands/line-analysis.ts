@@ -23,12 +23,20 @@ export const lineAnalysisCommand = new Command('line-analysis')
     const spinner = ora('Analyzing changed lines...').start();
     
     try {
-      const config = await loadConfig(options.config);
+      // Determine the actual working directory where the command was invoked
+      const actualWorkingDir = process.env.INIT_CWD || process.cwd();
+      
+      // Load config relative to the actual working directory
+      const configPath = options.config ? 
+        (require('path').isAbsolute(options.config) ? options.config : require('path').resolve(actualWorkingDir, options.config)) :
+        undefined;
+      
+      const config = await loadConfig(configPath, { rootDir: actualWorkingDir });
       const { createLogger } = require('@tia-js/common');
       const logger = createLogger('info');
       
-      // Use current working directory for line analysis instead of config.rootDir
-      const workingDir = process.cwd();
+      // Use config.rootDir for analysis, fallback to current working directory
+      const workingDir = config.rootDir || process.cwd();
       const analyzer = new LineLevelAnalyzer(workingDir, logger);
       
       // Determine which files to analyze
@@ -59,9 +67,14 @@ export const lineAnalysisCommand = new Command('line-analysis')
             .filter((f: string) => !f.startsWith('../')) // Only include files within the working directory
             .filter((f: string) => {
               // Only analyze source files, not config/coverage/test files
-              return f.startsWith('src/') && 
-                     (f.endsWith('.js') || f.endsWith('.jsx') || f.endsWith('.ts') || f.endsWith('.tsx')) &&
-                     !f.includes('.test.') && !f.includes('.spec.');
+              const isJSFile = f.startsWith('src/') && 
+                               (f.endsWith('.js') || f.endsWith('.jsx') || f.endsWith('.ts') || f.endsWith('.tsx')) &&
+                               !f.includes('.test.') && !f.includes('.spec.');
+              
+              const isGoFile = f.endsWith('.go') && !f.endsWith('_test.go');
+              const isPythonFile = f.endsWith('.py') && !f.includes('test_') && !f.endsWith('_test.py');
+              
+              return isJSFile || isGoFile || isPythonFile;
             });
           
           if (changedFiles.length === 0) {
@@ -92,6 +105,16 @@ export const lineAnalysisCommand = new Command('line-analysis')
         console.log('  1. Sync coverage data from your TIA server to .tia/per-test-coverage/');
         console.log('  2. Ensure coverage data is up-to-date with the main branch');
         console.log('  3. Run TIA commands against your PR changes');
+        process.exit(1);
+      }
+      
+      // Check if coverage directory has files
+      const coverageFiles = fs.readdirSync(coverageDir);
+      
+      if (coverageFiles.length === 0) {
+        spinner.fail('Coverage directory is empty');
+        console.log();
+        console.log(chalk.yellow('⚠️  Coverage directory exists but is empty'));
         process.exit(1);
       }
       

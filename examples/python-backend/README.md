@@ -135,3 +135,5 @@ The `conftest.py` file includes an `autouse` fixture that automatically resets t
 
 The `pytest_tia_plugin.py` automatically collects coverage data for each test. No additional configuration is needed - just run pytest normally and the plugin will handle coverage collection for TIA.
 
+
+
