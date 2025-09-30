@@ -23,7 +23,7 @@
     "testing"
   ],
   "author": "Your Name",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "dependencies": {
     "@tia-js/common": "^1.0.0",
     "@tia-js/core": "^1.0.0"

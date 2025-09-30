@@ -248,5 +248,5 @@ TIA.js uses **line-level coverage mapping** to provide surgical precision:
 
 ---
 
-**License**: MIT  
+**License**: Apache-2.0  
 **Repository**: https://github.com/your-org/tia-js
