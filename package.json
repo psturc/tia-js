@@ -1,6 +1,6 @@
 {
   "name": "tia-js",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Streamlined Test Impact Analysis for PR workflows - Line-level precision for test optimization",
   "private": false,
   "workspaces": [
