@@ -1,6 +1,6 @@
 {
   "name": "tia-jest-example",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "Node.js server example using TIA with Jest for precise test impact analysis",
   "main": "src/server.ts",
   "scripts": {

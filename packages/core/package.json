@@ -1,6 +1,6 @@
 {
   "name": "@tia-js/core",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "Core Test Impact Analysis engine",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -24,7 +24,7 @@
   "author": "Your Name",
   "license": "Apache-2.0",
   "dependencies": {
-    "@tia-js/common": "^1.0.0",
+    "@tia-js/common": "^0.0.1",
     "chokidar": "^3.5.3",
     "fast-glob": "^3.3.0",
     "minimatch": "^9.0.0"

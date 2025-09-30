@@ -1,6 +1,6 @@
 {
   "name": "@tia-js/jest",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "Jest adapter for Test Impact Analysis",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -25,8 +25,8 @@
   "author": "Your Name",
   "license": "Apache-2.0",
   "dependencies": {
-    "@tia-js/common": "^1.0.0",
-    "@tia-js/core": "^1.0.0"
+    "@tia-js/common": "^0.0.1",
+    "@tia-js/core": "^0.0.1"
   },
   "peerDependencies": {
     "jest": ">=27.0.0"
